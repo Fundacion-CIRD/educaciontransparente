@@ -1,0 +1,48 @@
+<nav class="navbar" role="navigation" x-data="{showDrawer: false}">
+  <div class="container is-widescreen">
+    <div class="navbar-brand">
+      <a href="/" class="navbar-item">
+        <h1 class="title is-5">Jóvenes Contralores</h1>
+      </a>
+      <a
+        x-on:click="() => showDrawer = !showDrawer"
+        role="button"
+        class="navbar-burger"
+        aria-label="menu"
+        aria-expanded="false"
+        :class="!showDrawer || 'is-active'"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="navbar-menu" :class="!showDrawer || 'is-active'" x-transition>
+      <div class="navbar-start">
+        <a href="/quienes-somos" class="navbar-item">Quienes somos</a>
+        <a href="/" class="navbar-item">Rendiciones</a>
+        <a href="/recursos" class="navbar-item">Recursos</a>
+      </div>
+      <div class="navbar-end">
+        <div class="navbar-item">
+          {#          <div class="navbar-search">#}
+          {#            <div class="field">#}
+          {#              <p class="control has-icons-left">#}
+          {#                <input class="input" type="search" placeholder="Buscar">#}
+          {#                <span class="icon is-left">#}
+          {#                <i class="fas fa-search"></i>#}
+          {#              </span>#}
+          {#              </p>#}
+          {#            </div>#}
+          {#          </div>#}
+          <div class="buttons">
+            <a class="button is-primary has-text-white" href="/admin">
+              Cargar datos
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

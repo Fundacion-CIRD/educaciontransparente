@@ -1,0 +1,82 @@
+{% extends 'components/layout.html' %}
+{% load static %}
+
+{% block body %}
+  <div x-data="institutionDetails" x-init="fetchResults()">
+    {% include 'components/institution-header.html' %}
+
+    <section class="section">
+      <div class="container">
+        <div class="columns is-gapless">
+          <!-- Left Column - Horizontal Bar Chart -->
+          <div class="column is-half">
+            <div id="bar-chart" class="chart-container"></div>
+          </div>
+
+          <!-- Vertical Separator -->
+          <div class="separator"></div>
+
+          <!-- Right Column - Icicle Chart -->
+          <div class="column is-half">
+            <div id="icicle-chart" class="chart-container"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="section">
+      <div class="container">
+        <h3 class="is-size-3 mb-4 has-text-weight-semibold">Rendiciones</h3>
+        <table class="table is-striped is-fullwidth is-hoverable">
+          <thead>
+          <tr>
+            <template x-for="header in headers" :key="header">
+              <th value="header" @click="sortBy(header)">
+                <span x-text="header"></span>&nbsp;
+                {#                <i#}
+                {#                  :class="{'fas': true, 'fa-chevron-up': !sortDesc, 'fa-chevron-down': sortDesc, 'visible': sortCol === header}"#}
+                {#                  class="fas fa-chevron-up"></i>#}
+              </th>
+            </template>
+          </tr>
+          </thead>
+          <tbody>
+          <template x-for="report in results" :key="report.id">
+            <tr>
+              <td class="has-text-centered" x-text="report.disbursement.resolution.documentYear"></td>
+              <td x-text="report.disbursement.principalName"></td>
+              <td class="has-text-right" x-text="formatNumber(report.disbursement.principalIssuedId)"></td>
+              <td
+                class="has-text-centered"
+                x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></td>
+              <td class="has-text-right"
+                  x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
+              <td class="has-text-centered" x-text="formatDate(report.disbursement.disbursementDate)"></td>
+              <td class="has-text-right"
+                  x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
+              <td class="has-text-centered">
+                <span :class="tagColor(report.disbursement.dueDate)"
+                      x-text="formatDate(report.disbursement.dueDate)"></span>
+              </td>
+              <td>
+                <a :href="`/instituciones/${report.disbursement.institutionId}/rendiciones/${report.id}/`">Ver
+                  detalles</a>
+              </td>
+            </tr>
+          </template>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script>
+      var yearlyReport = {{ yearly_report|safe }}
+  </script>
+  <script src="{% static 'charts.js' %}"></script>
+  <script src="{% static 'institution-table.js' %}"></script>
+{% endblock %}

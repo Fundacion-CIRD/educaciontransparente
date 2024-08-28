@@ -1,0 +1,51 @@
+{% load static %}
+<!-- Footer -->
+<footer class="is-background-white pb-0">
+  <div class="container footer is-background-white pb-6">
+    <!-- First Row -->
+    <div class="columns is-vcentered">
+      <div class="column">
+        <img style="height: 126px" src="{% static 'fenaes.png' %}" alt="FENAES">
+      </div>
+      <div class="column has-text-right">
+        <a href="https://www.facebook.com" class="icon">
+          <i class="fab fa-facebook"></i>
+        </a>
+        <a href="https://www.twitter.com" class="icon">
+          <i class="fab fa-twitter"></i>
+        </a>
+        <a href="https://www.instagram.com" class="icon">
+          <i class="fab fa-instagram"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Second Row -->
+    <hr class="has-background-primary" style="height: 1px">
+
+    <!-- Third Row -->
+    <div class="is-flex is-flex-direction-row is-justify-content-space-between is-align-items-center">
+      <div class="is-justify-content-center">
+        <p class="is-uppercase is-color-grey-light has-text-weight-semibold is-size-5">Aliados</p>
+      </div>
+      <div class="is-flex is-gap-3">
+        <figure class="image">
+          <img style="height: 30px" src="{% static 'cird.png' %}" alt="CIRD">
+        </figure>
+        <figure class="image">
+          <img style="height: 30px" src="{% static 'civilab.png' %}" alt="Civilab">
+        </figure>
+        <figure class="image">
+          <img style="height: 30px" src="{% static 'conciencia-viva.png' %}" alt="Conciencia Viva">
+        </figure>
+      </div>
+    </div>
+  </div>
+  <div class="has-text-centered is-flex is-align-items-center is-justify-content-center py-2"
+       style="background: hsla(284, 100%, 29%, 1);">
+    <p class="is-color-white mr-1">
+      Plataforma diseñada y desarrollada por
+    </p>
+    <img src="{% static 'civilab-white.png' %}" alt="Civilab" style="height: 27px">
+  </div>
+</footer>

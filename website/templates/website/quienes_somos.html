@@ -1,0 +1,177 @@
+{% extends 'components/layout.html' %}
+{% load static %}
+
+{% block body %}
+  <section class="has-background-primary">
+    <div class="container is-max-desktop py-6 px-4">
+      <div class="columns is-vcentered">
+        <div class="column is-three-fifths">
+          <h2 id="title" class="is-size-3 has-text-weight-semibold has-text-white mb-3">
+            Quienes somos
+          </h2>
+          <p class="is-size-6 has-text-white">
+            Somos un proyecto social llamado Jóvenes Contralores para una educación de calidad, que busca contribuir
+            al
+            mejoramiento en la gestión de los fondos de gratuidad a través de la transparencia y acceso público de los
+            datos, fortaleciendo la capacidad de control en la comunidad educativa y promoviendo la instalación de la
+            cultura de la rendición de cuentas en los colegios.
+          </p>
+        </div>
+        <div class="column">
+          <img
+            class="has-radius-normal"
+            src="{% static 'quienes-somos.png' %}"
+            alt="Quienes Somos"
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="text-content container is-max-desktop mt-6 py-4 px-4 mb-5 content">
+    <h3 class="is-size-4 has-text-weight-semibold">Contexto</h3>
+    <p>El Ministerio de Educación y Ciencias (MEC), desde el año 2011, transfiere anualmente dinero a centros
+      educativos
+      públicos de nivel básico y medio, estos recursos son conocidos como fondos de gratuidad y están destinados al
+      gasto corriente y capital.</p>
+
+    <p>A pesar de que existe un procedimiento interno para el control del gasto ante la Contraloría General de la
+      República (CGR) y el MEC, existen publicaciones periodísticas sobre manifestaciones de estudiantes y/o
+      familiares
+      antes supuestos hechos de malversación o la no rendición de cuenta de los fondos de gratuidad.</p>
+
+    <p>El conocimiento sobre este recurso público es bajo y en la actualidad no existe un sistema de control
+      tecnológico
+      de acceso público que ayude a visualizar los montos transferidos, así como gastos realizados y mucho menos
+      incentive a una rendición de cuentas públicas ante la comunidad educativa.</p>
+
+    <p>Para contribuir en la solución de esta problemática en el sector educativo existe la necesidad de fortalecer y
+      orientar a la comunidad educativa en el ejercicio constante para desempeñar correctamente el rol de contralores
+      del uso de los fondos de gratuidad, para tal efecto este proyecto social contempla actividades de capacitación,
+      el
+      diseño de una herramienta digital, así como la promoción para la realización de rendición de cuentas.</p>
+
+    <p>Jóvenes Contralores para una educación de calidad es un proyecto social que busca contribuir al mejoramiento en
+      la gestión de los fondos de gratuidad a través de la transparencia y acceso público de los datos, fortaleciendo
+      la
+      capacidad de control en la comunidad educativa y promoviendo la instalación de la cultura de la rendición de
+      cuentas en los colegios.</p>
+
+    <p>En esta plataforma digital vas a poder encontrar de manera georreferenciada, información sobre las
+      instituciones
+      educativas que reciben los fondos de gratuidad, detalles de cada desembolso, resumen de cada rendición
+      presentada
+      y su detalle.</p>
+
+    <p>Esta información es relevante para todo el país porque el objetivo de estos fondos públicos responde a mejorar
+      el
+      nivel de calidad en la educación para los estudiantes.</p>
+
+    <p>Esta es una herramienta digital de control de fondos destinado a un programa del Estado Paraguayo, con datos y
+      público objetivo limitado, sin embargo, su aplicación tiene escalabilidad a nivel nacional y adaptabilidad para
+      controlar otros fondos destinados directamente para el bienestar de las personas. La viabilidad del proyecto se
+      basa en experiencias anteriores realizadas por la Fundación CIRD para la rendición de cuenta de los Fondos de
+      Equidad que el Ministerio de Salud transfiere a los Consejos locales de Salud.</p>
+
+  </section>
+
+
+  <div class="bg-light py-4">
+    <section class="text-content container is-max-desktop my-5 px-4 content">
+      <h3 class="is-size-4 has-text-weight-semibold">Objetivos del proyecto</h3>
+      <ul>
+        <li>Fomentar la transparencia en la gestión de los fondos de gratuidad a través de la apertura de datos y
+          facilitar su acceso público a través de la plataforma digital.
+        </li>
+        <li>Capacitar a la comunidad educativa en temas referentes a: proceso de desembolso, ejecución y rendición de
+          cuenta de los fondos de gratuidad a instancias públicas como la Contraloría General de la República y el
+          Ministerio de Educación y Ciencias. Utilización de la ley de acceso a la información pública como herramienta
+          de
+          transparencia y control. Formas de participación ciudadana para la buena gobernanza.
+        </li>
+        <li>Incentivar a la cultura de la rendición de cuentas en las instituciones educativas para los estudiantes y
+          familiares.
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="text-content container is-max-desktop my-5 py-4 px-4 content">
+    <h3 class="is-size-4 has-text-weight-semibold">¿Qué es el fondo de gratuidad en educación?</h3>
+    <p>El fondo de gratuidad es una cantidad de dinero que el Estado Paraguayo vía el Ministerio de Educación y Ciencias
+      (MEC) entrega anualmente a los directores de las escuelas y colegios públicos o subvencionados. Se lo conoce
+      también como gratuidad de la educación, pero técnicamente se denomina “Recursos asignados a las instituciones
+      educativas de gestión oficial de los niveles inicial, escolar básica y media.</p>
+
+    <p>Para que las instituciones reciban este recurso económico deben seguir el reglamento de procedimientos para la
+      transferencia de los fondos y la rendición de cuentas que son emitidos a través de resoluciones del MEC.</p>
+
+    <p>Este fondo puede cubrir gastos corrientes y de capital, pero la priorización de necesidades debe ser cocreado y
+      rendidos con el “Equipo de Gestión de Instituciones Educativas”, más conocido como el EGIE.</p>
+
+    <p>El EGIE según las resoluciones N°. 15917/2015 y la N°. 19324/2015 es una organización constituida por educadores,
+      padres y alumnos, integrados legal y democráticamente bajo el liderazgo del Director de la institución educativa
+      que apoyan, colaboran y gestionan de manera participativa el servicio público de la educación para el
+      mantenimiento, desarrollo y mejora de la calidad de la educación en el marco del proyecto educativo
+      institucional.</p>
+
+    <p>El EGIE lo integran el Director de la institución educativa, Representante de Docentes, el de Padres y el de
+      Estudiantes, quienes son elegidos por sus pares, Representantes de otros actores educativos según la realidad
+      educativa y el servicio prestado, que será incluido por mayoría simple del EGIE.</p>
+
+    <p>Las supervisiones de Apoyo Técnico Pedagógico deberán refrendar y registrar el acta de conformación del EGIE.</p>
+
+  </section>
+
+  <div class="bg-light py-4">
+    <section class="text-content container is-max-desktop my-5 px-4 content">
+      <h3 class="is-size-4 has-text-weight-semibold">Equipo impulsor</h3>
+      <p>Para la implementación del proyecto “Jóvenes contralores para una educación de calidad” se ha constituido un
+        equipo de organizaciones de la sociedad civil que está integrado por CIVILAB, Conciencia Viva, FENAES, Fundación
+        CIRD.</p>
+
+      <p>El proyecto fue planteado como consecuencia de las recomendaciones del Estudio de caso de uso de los fondos de
+        gratuidad en el Colegio Raúl Peña de Caacupé elaborado por la Coalición por la legalidad del Proyecto Más
+        Ciudadanía menos Corrupción.</p>
+
+      <p>Las recomendaciones del Estudio de Caso fueron:</p>
+
+      <p><strong>En lo que respecta al tejido social</strong><br>
+        Es de vital importancia el fortalecimiento de la sociedad, desde las OSC, bajo las diversas denominaciones, como
+        en este caso, Comunidad Educativa, en el sentido de que las mismas cuenten con la asistencia y orientaciones
+        necesarias, que permitan el ejercicio constante, eficiente y organizado del rol contralor del Estado en el uso
+        de los recursos públicos.</p>
+
+      <p><strong>En relación con las normativas</strong><br>
+        Se verificó que no existe déficit en la existencia de normativas, hasta se puede afirmar que son excesivas, por
+        lo tanto, es importante aplicar mecanismos que garanticen su cumplimiento en forma transparente, y con las
+        debidas rendiciones de cuentas por parte de las instituciones beneficiarias de dichos fondos de gratuidad, ante
+        los entes contralores del Estado y ante la ciudadanía.</p>
+
+      <p>Es también importante dotar a la ciudadanía de herramientas tales como la capacitación en el cumplimiento de
+        los derechos ciudadanos que los asisten para enfrentar con mayores probabilidades de éxito, situaciones o hechos
+        de corrupción.</p>
+
+      <p>A más del cumplimiento irrestricto de las normativas, es necesario complementar con mecanismos eficientes que
+        garanticen la comunicación con la divulgación periódica a la ciudadanía, respecto del uso transparente de los
+        fondos de gratuidad.</p>
+
+      <p><strong>En relación con la recuperación de los fondos</strong><br>
+        Con el fortalecimiento de las instancias de las OSC, se podría insistir ante las instituciones pertinentes a fin
+        de lograr la recuperación de los recursos pecuniarios u otros bienes afectados por las prácticas de corrupción.
+      </p>
+
+      <p><strong>En relación con el sistema educativo</strong><br>
+        Es de vital importancia promover el desarrollo de un sistema que impulse la cultura de la integridad. Entre
+        otras acciones, se propone activar los mecanismos necesarios para lograr la inclusión de dicha cultura en los
+        planes educativos a fin de que se aborden temas tales como ética, integridad y transparencia.</p>
+
+      <p><strong>En relación con los organismos de control</strong><br>
+        Desarrollar un modelo de control preventivo, con apoyo de tecnología y con un sistema de alertas tempranas que
+        permita con anticipación evitar potenciales casos de corrupción. Así, se podría obtener resultados ex ante, en
+        contraposición a los procedimientos actuales, ex post.</p>
+
+    </section>
+  </div>
+{% endblock %}

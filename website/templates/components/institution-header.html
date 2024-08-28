@@ -1,0 +1,67 @@
+{% load web_utils %}
+{% load static %}
+<div class="container my-6 py-6 px-4">
+  <div class="columns is-vcentered is-gap-4">
+    <!-- Left Side - Image -->
+    <div class="column is-narrow">
+      <figure class="image is-256x256">
+        <img src="{% static 'institution-placeholder.png' %}" alt="Institucion">
+      </figure>
+    </div>
+
+    <!-- Right Side - Text and Select -->
+    <div class="column">
+      <p class="has-text-weight-bold is-size-6">
+        {% if report %}
+          DETALLE DE RENDICION
+        {% else %}
+          RESUMEN DE RENDICION
+        {% endif %}
+      </p>
+      <h1 class="title is-1 has-text-weight-semibold">{{ object.name }}</h1>
+
+      {% if not report %}
+        <div class="field">
+          <label class="label" for="yearSelect">Año de rendición</label>
+          <div class="control">
+            <div class="select">
+              <select x-on:change="setYear" id="yearSelect">
+                <option value="" selected>Todos</option>
+                <option>2024</option>
+                <option>2023</option>
+                <option>2022</option>
+                <option>2021</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="mt-5 mb-0">
+        <div class="columns mt-1">
+          <div class="column">
+            <p class="has-text-weight-medium mb-2">Total desembolsado</p>
+            <p
+              class="p-4 is-size-4 has-text-weight-semibold has-radius-normal"
+              style="background-color: hsla(209, 100%, 89%, 1)"
+            >
+              Gs. {{ totals.total_disbursed|format_number }}
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-weight-medium mb-2">Total rendido</p>
+            <p
+              class="p-4 is-size-4 has-text-weight-semibold has-radius-normal"
+              style="background-color: hsla(210, 100%, 75%, 1)"
+            >
+              Gs. {{ totals.total_reported|format_number }}
+            </p>
+          </div>
+        </div>
+        <p class="has-text-weight-light is-size-7">
+          <sup>*</sup> Los montos reflejados aquí representan los valores cargados en esta plataforma
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

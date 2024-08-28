@@ -1,0 +1,76 @@
+{% load web_utils %}
+<section class="section">
+  <div class="container">
+    <h3 class="has-text-weight-semibold is-size-4 mb-5">Detalles de rendición</h3>
+    <table class="table is-fullwidth is-striped">
+      <thead>
+      <tr>
+        <th>Tipo de comprobante</th>
+        <th>Nro. de comprobante</th>
+        <th>Fecha</th>
+        <th>Objeto del gasto</th>
+        <th>Conceptos</th>
+        <th>Total</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for receipt in report.receipts.all %}
+
+        <tr>
+          <td>{{ receipt.receipt_type.name }}</td>
+          <td>{{ receipt.receipt_number }}</td>
+          <td>{{ receipt.receipt_date }}</td>
+          <td>{{ receipt.object_of_expenditure }}</td>
+          <td>{{ receipt.description }}</td>
+          <td class="has-text-right">Gs. {{ receipt.total|format_number }}</td>
+        </tr>
+
+      {% endfor %}
+      </tbody>
+      {#      <template x-for="invoice in $store.tableState.invoices" :key="invoice.no">#}
+      {#        <tbody>#}
+      {#        <tr>#}
+      {#          <td>#}
+      {#            <div style="width: 24px; height: 24px;" href="#"#}
+      {#                 @click.prevent="$store.tableState.toggleExpanded(invoice.no)">#}
+      {#              <i style="width: 24px; height: 24px;"#}
+      {#                 :class="invoice.no == $store.tableState.expandedRow ? 'fas fa-minus' : 'fas fa-plus'"></i>#}
+      {#            </div>#}
+      {#          </td>#}
+      {#          <td x-text="invoice.no"></td>#}
+      {#          <td x-text="invoice.issuer"></td>#}
+      {#          <td x-text="invoice.date"></td>#}
+      {#          <td x-text="invoice.total"></td>#}
+      {#        </tr>#}
+      {#        <tr x-show="invoice.no == $store.tableState.expandedRow">#}
+      {#          <td colspan="5">#}
+      {#            <table class="table is-fullwidth is-striped is-hidden"#}
+      {#                   x-bind:class="{ 'is-hidden': invoice.no != $store.tableState.expandedRow }">#}
+      {#              <thead>#}
+      {#              <tr>#}
+      {#                <th>Item No</th>#}
+      {#                <th>Description</th>#}
+      {#                <th>Qty</th>#}
+      {#                <th>Unit Price</th>#}
+      {#                <th>Subtotal</th>#}
+      {#              </tr>#}
+      {#              </thead>#}
+      {#              <tbody>#}
+      {#              <template x-for="item in invoice.items" :key="item.no">#}
+      {#                <tr>#}
+      {#                  <td x-text="item.no"></td>#}
+      {#                  <td x-text="item.description"></td>#}
+      {#                  <td x-text="item.qty"></td>#}
+      {#                  <td x-text="item.unitPrice"></td>#}
+      {#                  <td x-text="item.subtotal"></td>#}
+      {#                </tr>#}
+      {#              </template>#}
+      {#              </tbody>#}
+      {#            </table>#}
+      {#          </td>#}
+      {#        </tr>#}
+      {#        </tbody>#}
+      {#      </template>#}
+    </table>
+  </div>
+</section>

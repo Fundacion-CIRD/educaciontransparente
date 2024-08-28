@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "~=4.2.8"
+django-filter = "*"
+django-unfold = "*"
+pillow = "*"
+djangorestframework = "~=3.15.1"
+psycopg = "*"
+python-dotenv = "*"
+pytest-django = "*"
+coverage = "*"
+gunicorn = "*"
+djangorestframework-camel-case = "*"
+drf-orjson-renderer = "*"
+openpyxl = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

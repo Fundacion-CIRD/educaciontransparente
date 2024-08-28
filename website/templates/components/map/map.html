@@ -1,0 +1,130 @@
+<div class="section p-0" x-data="mapFormComponent">
+  <div class="columns map-container m-0">
+    <div class="column is-two-fifths p-6 is-relative map-filters">
+      <div class="my-2">
+        <h4 class="is-size-5 has-text-weight-medium">Mapa interactivo</h4>
+        <p class="is-size-6">
+          Seleciona el departamento, la ciudad o escribe el nombre de la ciudad, institución o director para iniciar la
+          búsqueda.
+        </p>
+      </div>
+      <div class="field">
+        <label class="label" for="departmentSelect">Departamento</label>
+        <div class="control">
+          <div class="select">
+            <select name="department" id="departmentSelect" class="control" @change="selectDepartment($event)">
+              <option value="">TODOS</option>
+              {% for department in departments %}
+                <option value="{{ department.id }}">{{ department.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="districtInput">Distrito</label>
+        <div class="control">
+          <input
+            id="districtInput"
+            class="input"
+            type="text"
+            placeholder="Escriba un nombre..."
+            x-model="queries.districts"
+            @input="debouncedFetchResults('districts')"
+            @click.away="open.districts = false"
+          >
+        </div>
+        <div class="dropdown" x-show="open.districts"
+             :class="{ 'is-active': open.districts }">
+          <div class="dropdown-menu" id="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+              <a
+                href="#"
+                class="dropdown-item"
+                :class="{ 'is-active': results.districts.length === 0 }"
+                x-show="results.districts.length === 0"
+                disabled
+              >
+                <span>No hay resultados</span>
+              </a>
+              <template x-for="(result, i) in results.districts" :key="i">
+                <a
+                  href="#"
+                  class="dropdown-item"
+                  :class="{ 'is-active': i === selectedIndex.districts }"
+                  @click.prevent="selectResult('districts', result)"
+                >
+                  <span x-text="result.name"></span>
+                </a>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="institutionInput">Institución</label>
+        <div class="control">
+          <input
+            id="institutionInput"
+            class="input"
+            type="text"
+            placeholder="Escriba un nombre..."
+            x-model="queries.institutions"
+            @input="debouncedFetchResults('institutions')"
+            @click.away="open.institutions = false"
+          >
+        </div>
+        <div class="dropdown" x-show="open.institutions"
+             :class="{ 'is-active': open.institutions}">
+          <div class="dropdown-menu" id="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+              <a
+                href="#"
+                class="dropdown-item"
+                :class="{ 'is-active': results.institutions.length === 0 }"
+                x-show="results.institutions.length === 0"
+                disabled
+              >
+                <span>No hay resultados</span>
+              </a>
+              <template x-for="(result, index) in results.institutions" :key="index">
+                <a
+                  href="#"
+                  class="dropdown-item"
+                  :class="{ 'is-active': index === selectedIndex.institutions }"
+                  @click.prevent="selectResult('institutions', result)"
+                >
+                  <span x-text="result.name"></span>
+                </a>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr class="is-background-primary" style="height: 1px"/>
+      <div class="mt-5 mb-0">
+        <div class="columns has-radius-normal mt-1"
+             style="background-color: hsla(201, 68%, 54%, 0.15); margin-inline: 0">
+          <div class="column">
+            <p class="has-text-weight-medium mb-2">Total desembolsado</p>
+            <p class="py-3 px-4 has-background-white has-text-centered has-text-weight-semibold has-radius-normal">
+              Gs. <span x-text="Intl.NumberFormat('es-ES').format(summary.totalDisbursed || 0)"></span>
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-weight-medium mb-2">Total rendido</p>
+            <p class="py-3 px-4 has-background-white has-text-centered has-text-weight-semibold has-radius-normal">
+              Gs. <span x-text="Intl.NumberFormat('es-ES').format(summary.totalReported || 0)"></span>
+            </p>
+          </div>
+        </div>
+        <p class="has-text-weight-light is-size-7">
+          <sup>*</sup> Los montos reflejados aquí representan los valores cargados en esta plataforma
+        </p>
+      </div>
+    </div>
+    <div class="column p-0 is-relative">
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
