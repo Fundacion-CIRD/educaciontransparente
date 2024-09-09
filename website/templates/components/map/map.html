@@ -108,13 +108,13 @@
           <div class="column">
             <p class="has-text-weight-medium mb-2">Total desembolsado</p>
             <p class="py-3 px-4 has-background-white has-text-centered has-text-weight-semibold has-radius-normal">
-              Gs. <span x-text="Intl.NumberFormat('es-ES').format(summary.totalDisbursed || 0)"></span>
+              Gs. <span x-text="Intl.NumberFormat('es-ES').format(summary.disbursed || 0)"></span>
             </p>
           </div>
           <div class="column">
             <p class="has-text-weight-medium mb-2">Total rendido</p>
             <p class="py-3 px-4 has-background-white has-text-centered has-text-weight-semibold has-radius-normal">
-              Gs. <span x-text="Intl.NumberFormat('es-ES').format(summary.totalReported || 0)"></span>
+              Gs. <span x-text="Intl.NumberFormat('es-ES').format(summary.reported || 0)"></span>
             </p>
           </div>
         </div>

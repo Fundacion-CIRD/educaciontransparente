@@ -1,0 +1,714 @@
+[
+  {
+    "code": 100,
+    "name": "SERVICIOS PERSONALES",
+    "subcategories": [
+      {
+        "code": 140,
+        "name": "PERSONAL CONTRATADO",
+        "items": [
+          {
+            "code": 143,
+            "name": "Contratación ocasional del personal docente"
+          },
+          {
+            "code": 144,
+            "name": "Jornales"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "code": 200,
+    "name": "SERVICIOS NO PERSONALES",
+    "subcategories": [
+      {
+        "code": 210,
+        "name": "SERVICIOS BÁSICOS",
+        "items": [
+          {
+            "code": 211,
+            "name": "Energía eléctrica"
+          },
+          {
+            "code": 212,
+            "name": "Agua"
+          },
+          {
+            "code": 214,
+            "name": "Teléfonos, telefax y otros servicios de telecomunicaciones"
+          },
+          {
+            "code": 215,
+            "name": "Correos y otros servicios postales"
+          },
+          {
+            "code": 219,
+            "name": "Servicios básicos varios"
+          }
+        ]
+      },
+      {
+        "code": 220,
+        "name": "TRANSPORTE Y ALMACENAJE",
+        "items": [
+          {
+            "code": 221,
+            "name": "Transporte"
+          },
+          {
+            "code": 222,
+            "name": "Almacenaje"
+          },
+          {
+            "code": 223,
+            "name": "Transporte de personas"
+          },
+          {
+            "code": 229,
+            "name": "Transporte y almacenaje varios"
+          }
+        ]
+      },
+      {
+        "code": 230,
+        "name": "PASAJES Y VIÁTICOS",
+        "items": [
+          {
+            "code": 231,
+            "name": "Pasajes"
+          },
+          {
+            "code": 232,
+            "name": "Viáticos y movilidad"
+          }
+        ]
+      },
+      {
+        "code": 240,
+        "name": "GASTOS POR SERVICIOS DE ASEO, MANTENIMIENTO Y REPARACIONES",
+        "items": [
+          {
+            "code": 242,
+            "name": "Mantenimiento y reparaciones menores de edificios y locales"
+          },
+          {
+            "code": 243,
+            "name": "Mantenimientos y reparaciones menores de maquinarias, equipos y muebles de oficina"
+          },
+          {
+            "code": 245,
+            "name": "Servicios de limpieza, aseo y fumigación"
+          },
+          {
+            "code": 246,
+            "name": "Mantenimientos y reparaciones menores de instalaciones"
+          },
+          {
+            "code": 247,
+            "name": "Mantenimientos y reparaciones menores de obras"
+          },
+          {
+            "code": 248,
+            "name": "Otros mantenimientos y reparaciones menores"
+          },
+          {
+            "code": 249,
+            "name": "Servicios de aseo, mantenimiento y reparaciones menores varias"
+          }
+        ]
+      },
+      {
+        "code": 250,
+        "name": "ALQUILERES Y DERECHOS",
+        "items": [
+          {
+            "code": 251,
+            "name": "Alquiler de edificios y locales"
+          },
+          {
+            "code": 252,
+            "name": "Alquiler de maquinarias y equipos"
+          },
+          {
+            "code": 253,
+            "name": "Derechos de bienes intangibles"
+          },
+          {
+            "code": 254,
+            "name": "Alquiler de equipos de computación"
+          },
+          {
+            "code": 255,
+            "name": "Alquiler de fotocopiadoras"
+          },
+          {
+            "code": 256,
+            "name": "Arrendamiento de tierras y terrenos"
+          },
+          {
+            "code": 258,
+            "name": "Alquileres y derechos de sistema leasing"
+          },
+          {
+            "code": 259,
+            "name": "Alquileres y derechos varios"
+          }
+        ]
+      },
+      {
+        "code": 260,
+        "name": "SERVICIOS TÉCNICOS Y PROFESIONALES",
+        "items": [
+          {
+            "code": 261,
+            "name": "De informática y sistemas computarizados"
+          },
+          {
+            "code": 262,
+            "name": "Imprenta, publicaciones y reproducciones"
+          },
+          {
+            "code": 263,
+            "name": "Servicios bancarios"
+          },
+          {
+            "code": 264,
+            "name": "Primas y gastos de seguros"
+          },
+          {
+            "code": 265,
+            "name": "Publicidad y propaganda"
+          },
+          {
+            "code": 266,
+            "name": "Consultorías, asesorías e investigaciones"
+          },
+          {
+            "code": 267,
+            "name": "Promociones y exposiciones"
+          },
+          {
+            "code": 268,
+            "name": "Servicios de comunicaciones"
+          },
+          {
+            "code": 269,
+            "name": "Servicios técnicos y profesionales varios"
+          }
+        ]
+      },
+      {
+        "code": 270,
+        "name": "SERVICIO SOCIAL",
+        "items": [
+          {
+            "code": 279,
+            "name": "Servicio social"
+          }
+        ]
+      },
+      {
+        "code": 280,
+        "name": "OTROS SERVICIOS EN GENERAL",
+        "items": [
+          {
+            "code": 281,
+            "name": "Servicios de ceremonial"
+          },
+          {
+            "code": 282,
+            "name": "Servicios de vigilancia"
+          },
+          {
+            "code": 283,
+            "name": "Gastos de peculio"
+          },
+          {
+            "code": 284,
+            "name": "Servicios gastronómicos"
+          },
+          {
+            "code": 288,
+            "name": "Servicios en general"
+          },
+          {
+            "code": 289,
+            "name": "Otros servicios varios"
+          }
+        ]
+      },
+      {
+        "code": 290,
+        "name": "SERVICIOS DE CAPACITACIÓN Y ADIESTRAMIENTO",
+        "items": [
+          {
+            "code": 291,
+            "name": "Capacitación del personal del Estado"
+          },
+          {
+            "code": 292,
+            "name": "Capacitación y formación laboral"
+          },
+          {
+            "code": 293,
+            "name": "Capacitación especializada"
+          },
+          {
+            "code": 299,
+            "name": "Capacitación y adiestramiento varios"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "code": 300,
+    "name": "BIENES DE CONSUMO E INSUMOS",
+    "subcategories": [
+      {
+        "code": 310,
+        "name": "PRODUCTOS ALIMENTICIOS",
+        "items": [
+          {
+            "code": 311,
+            "name": "Alimentos para personas"
+          },
+          {
+            "code": 312,
+            "name": "Alimentos para animales"
+          },
+          {
+            "code": 319,
+            "name": "Productos alimenticios varios"
+          }
+        ]
+      },
+      {
+        "code": 320,
+        "name": "TEXTILES Y VESTUARIOS",
+        "items": [
+          {
+            "code": 321,
+            "name": "Hilados y telas"
+          },
+          {
+            "code": 322,
+            "name": "Prendas de vestir"
+          },
+          {
+            "code": 323,
+            "name": "Confecciones textiles"
+          },
+          {
+            "code": 324,
+            "name": "Calzados"
+          },
+          {
+            "code": 325,
+            "name": "Cueros, cauchos y gomas"
+          },
+          {
+            "code": 329,
+            "name": "Textiles y confecciones varios"
+          }
+        ]
+      },
+      {
+        "code": 330,
+        "name": "PRODUCTOS DE PAPEL, CARTÓN E IMPRESOS",
+        "items": [
+          {
+            "code": 331,
+            "name": "Papel de escritorio y cartón"
+          },
+          {
+            "code": 332,
+            "name": "Papel para computación"
+          },
+          {
+            "code": 333,
+            "name": "Productos e impresiones de artes gráficas"
+          },
+          {
+            "code": 334,
+            "name": "Productos de papel y cartón"
+          },
+          {
+            "code": 335,
+            "name": "Libros, revistas y periódicos"
+          },
+          {
+            "code": 336,
+            "name": "Textos de enseñanza"
+          },
+          {
+            "code": 339,
+            "name": "Productos de papel, cartón e impresos varios"
+          }
+        ]
+      },
+      {
+        "code": 340,
+        "name": "BIENES DE CONSUMO DE OFICINAS E INSUMOS",
+        "items": [
+          {
+            "code": 341,
+            "name": "Elementos de limpieza"
+          },
+          {
+            "code": 342,
+            "name": "Útiles de escritorio, oficina y enseñanza"
+          },
+          {
+            "code": 343,
+            "name": "Útiles y materiales eléctricos"
+          },
+          {
+            "code": 344,
+            "name": "Utensilios de cocina y comedor"
+          },
+          {
+            "code": 345,
+            "name": "Productos de vidrio, loza y porcelana"
+          },
+          {
+            "code": 346,
+            "name": "Repuestos y accesorios menores"
+          },
+          {
+            "code": 347,
+            "name": "Elementos y útiles diversos"
+          },
+          {
+            "code": 349,
+            "name": "Bienes de consumo varios"
+          }
+        ]
+      },
+      {
+        "code": 350,
+        "name": "PRODUCTOS E INSTRUMENTALES QUÍMICOS Y MEDICINALES",
+        "items": [
+          {
+            "code": 351,
+            "name": "Compuestos químicos"
+          },
+          {
+            "code": 352,
+            "name": "Productos farmacéuticos y medicinales"
+          },
+          {
+            "code": 353,
+            "name": "Abonos y fertilizantes"
+          },
+          {
+            "code": 354,
+            "name": "Insecticidas, fumigantes y otros"
+          },
+          {
+            "code": 355,
+            "name": "Tintas, pinturas y colorantes"
+          },
+          {
+            "code": 356,
+            "name": "Productos específicos veterinarios"
+          },
+          {
+            "code": 357,
+            "name": "Productos de material plástico"
+          },
+          {
+            "code": 358,
+            "name": "Útiles y materiales médico-quirúrgicos y de laboratorio"
+          },
+          {
+            "code": 359,
+            "name": "Productos e instrumentales químicos y medicinales varios"
+          }
+        ]
+      },
+      {
+        "code": 360,
+        "name": "COMBUSTIBLES Y LUBRICANTES",
+        "items": [
+          {
+            "code": 361,
+            "name": "Combustibles"
+          },
+          {
+            "code": 362,
+            "name": "Lubricantes"
+          },
+          {
+            "code": 369,
+            "name": "Combustibles y lubricantes varios"
+          }
+        ]
+      },
+      {
+        "code": 390,
+        "name": "OTROS BIENES DE CONSUMO",
+        "items": [
+          {
+            "code": 391,
+            "name": "Artículos de caucho"
+          },
+          {
+            "code": 392,
+            "name": "Cubiertas y cámaras de aire"
+          },
+          {
+            "code": 393,
+            "name": "Estructuras metálicas acabadas"
+          },
+          {
+            "code": 394,
+            "name": "Herramientas menores"
+          },
+          {
+            "code": 395,
+            "name": "Materiales para seguridad y adiestramiento"
+          },
+          {
+            "code": 396,
+            "name": "Artículos de plásticos"
+          },
+          {
+            "code": 397,
+            "name": "Productos e insumos metálicos"
+          },
+          {
+            "code": 398,
+            "name": "Productos e insumos no metálicos"
+          },
+          {
+            "code": 399,
+            "name": "Bienes de consumo varios"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "code": 500,
+    "name": "INVERSIÓN FÍSICA",
+    "subcategories": [
+      {
+        "code": 510,
+        "name": "ADQUISICIÓN DE INMUEBLES",
+        "items": [
+          {
+            "code": 511,
+            "name": "Tierras y terrenos"
+          },
+          {
+            "code": 512,
+            "name": "Adquisiciones de edificios e instalaciones"
+          },
+          {
+            "code": 519,
+            "name": "Adquisiciones de inmuebles varios"
+          }
+        ]
+      },
+      {
+        "code": 520,
+        "name": "CONSTRUCCIONES",
+        "items": [
+          {
+            "code": 521,
+            "name": "Construcciones de obras de uso público"
+          },
+          {
+            "code": 522,
+            "name": "Construcciones de obras de uso institucional"
+          },
+          {
+            "code": 523,
+            "name": "Construcciones de obras militares"
+          },
+          {
+            "code": 524,
+            "name": "Construcciones de obras para uso privado"
+          },
+          {
+            "code": 525,
+            "name": "Construcciones de obras de infraestructuras"
+          },
+          {
+            "code": 526,
+            "name": "Otras obras e instalaciones de infraestructuras"
+          },
+          {
+            "code": 528,
+            "name": "Escalamiento de Costos"
+          },
+          {
+            "code": 529,
+            "name": "Construcciones varias"
+          }
+        ]
+      },
+      {
+        "code": 530,
+        "name": "ADQUISICIONES DE MAQUINARIAS, EQUIPOS Y HERRAMIENTAS EN GENERAL",
+        "items": [
+          {
+            "code": 531,
+            "name": "Maquinarias y equipos de la construcción"
+          },
+          {
+            "code": 532,
+            "name": "Maquinarias y equipos agropecuarios e industriales"
+          },
+          {
+            "code": 533,
+            "name": "Maquinarias y equipos industriales"
+          },
+          {
+            "code": 534,
+            "name": "Equipos educativos y recreacionales"
+          },
+          {
+            "code": 535,
+            "name": "Equipos de salud y de laboratorio"
+          },
+          {
+            "code": 536,
+            "name": "Equipos de comunicaciones y señalamientos"
+          },
+          {
+            "code": 537,
+            "name": "Equipo de transporte"
+          },
+          {
+            "code": 538,
+            "name": "Herramientas, aparatos e instrumentos en general"
+          },
+          {
+            "code": 539,
+            "name": "Maquinarias, equipos y herramientas en general, varias"
+          }
+        ]
+      },
+      {
+        "code": 540,
+        "name": "ADQUISICIONES DE EQUIPOS DE OFICINA Y COMPUTACIÓN",
+        "items": [
+          {
+            "code": 541,
+            "name": "Adquisiciones de muebles y enseres"
+          },
+          {
+            "code": 542,
+            "name": "Adquisiciones de equipos de oficina"
+          },
+          {
+            "code": 543,
+            "name": "Adquisiciones de equipos de computación"
+          },
+          {
+            "code": 544,
+            "name": "Adquisiciones de equipos de imprenta"
+          },
+          {
+            "code": 549,
+            "name": "Adquisiciones de equipos de oficina y computación varias"
+          }
+        ]
+      },
+      {
+        "code": 550,
+        "name": "ADQUISICIONES DE EQUIPOS MILITARES Y DE SEGURIDAD",
+        "items": [
+          {
+            "code": 551,
+            "name": "Equipos militares y de seguridad"
+          },
+          {
+            "code": 552,
+            "name": "Equipos de seguridad institucional"
+          },
+          {
+            "code": 559,
+            "name": "Equipos militares y de seguridad varios"
+          }
+        ]
+      },
+      {
+        "code": 560,
+        "name": "ADQUISICIÓN DE SEMOVIENTES",
+        "items": [
+          {
+            "code": 569,
+            "name": "Adquisiciones de semovientes"
+          }
+        ]
+      },
+      {
+        "code": 570,
+        "name": "ADQUISICIONES DE ACTIVOS INTANGIBLES",
+        "items": [
+          {
+            "code": 579,
+            "name": "Activos intangibles"
+          }
+        ]
+      },
+      {
+        "code": 580,
+        "name": "ESTUDIOS Y PROYECTOS DE INVERSIÓN",
+        "items": [
+          {
+            "code": 589,
+            "name": "Estudios y proyectos de inversión varios"
+          }
+        ]
+      },
+      {
+        "code": 590,
+        "name": "OTROS GASTOS DE INVERSIÓN Y REPARACIONES MAYORES",
+        "items": [
+          {
+            "code": 591,
+            "name": "Inversión en recursos naturales al sector público"
+          },
+          {
+            "code": 592,
+            "name": "Inversión en recursos naturales al sector privado"
+          },
+          {
+            "code": 593,
+            "name": "Otras inversiones"
+          },
+          {
+            "code": 594,
+            "name": "Indemnizaciones por inmuebles"
+          },
+          {
+            "code": 595,
+            "name": "Reparaciones mayores de inmuebles"
+          },
+          {
+            "code": 596,
+            "name": "Reparaciones mayores de equipos"
+          },
+          {
+            "code": 597,
+            "name": "Reparaciones mayores de máquinas"
+          },
+          {
+            "code": 598,
+            "name": "Reparaciones mayores de herramientas y otros"
+          },
+          {
+            "code": 599,
+            "name": "Otras reparaciones mayores"
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -4,4 +4,17 @@
 {% block body %}
   {% include 'components/institution-header.html' %}
   {% include 'components/rendition-table.html' %}
+  <section class="section">
+    <div class="container">
+      <h3 class="is-size-4 mb-4 has-text-weight-semibold">Documentos</h3>
+      <h4 class="is-size-5 mb-3 has-text-weight-medium">Documentos del desembolso</h4>
+      {% with documents=report.disbursement.documents.all %}
+        {% include 'components/documents.html' %}
+      {% endwith %}
+      <h4 class="is-size-5 mt-5 mb-3 has-text-weight-medium">Documentos de la rendición</h4>
+      {% with documents=report.documents.all %}
+        {% include 'components/documents.html' %}
+      {% endwith %}
+    </div>
+  </section>
 {% endblock %}

@@ -17,6 +17,7 @@ gunicorn = "*"
 djangorestframework-camel-case = "*"
 drf-orjson-renderer = "*"
 openpyxl = "*"
+python-dateutil = "*"
 
 [dev-packages]
 

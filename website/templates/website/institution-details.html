@@ -27,7 +27,7 @@
 
     <section class="section">
       <div class="container">
-        <h3 class="is-size-3 mb-4 has-text-weight-semibold">Rendiciones</h3>
+        <h3 class="is-size-3 mb-4 has-text-weight-semibold">Desembolsos y Rendiciones</h3>
         <table class="table is-striped is-fullwidth is-hoverable">
           <thead>
           <tr>
@@ -47,9 +47,19 @@
               <td class="has-text-centered" x-text="report.disbursement.resolution.documentYear"></td>
               <td x-text="report.disbursement.principalName"></td>
               <td class="has-text-right" x-text="formatNumber(report.disbursement.principalIssuedId)"></td>
-              <td
-                class="has-text-centered"
-                x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></td>
+              <td class="has-text-centered">
+                <template x-if="report.disbursement.resolution.document">
+                  <a :href="report.disbursement.resolution.document">
+                  <span
+                    x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></span>
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  </a>
+                </template>
+                <template x-if="!report.disbursement.resolution.document">
+                  <span
+                    x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></span>
+                </template>
+              </td>
               <td class="has-text-right"
                   x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
               <td class="has-text-centered" x-text="formatDate(report.disbursement.disbursementDate)"></td>
@@ -59,9 +69,8 @@
                 <span :class="tagColor(report.disbursement.dueDate)"
                       x-text="formatDate(report.disbursement.dueDate)"></span>
               </td>
-              <td>
-                <a :href="`/instituciones/${report.disbursement.institutionId}/rendiciones/${report.id}/`">Ver
-                  detalles</a>
+              <td class="has-text-centered">
+                <a :href="`/instituciones/${report.disbursement.institutionId}/rendiciones/${report.id}/`">Ver</a>
               </td>
             </tr>
           </template>
@@ -75,7 +84,7 @@
 {% block scripts %}
   {{ block.super }}
   <script>
-      var yearlyReport = {{ yearly_report|safe }}
+    var yearlyReport = {{ yearly_report|safe }}
   </script>
   <script src="{% static 'charts.js' %}"></script>
   <script src="{% static 'institution-table.js' %}"></script>

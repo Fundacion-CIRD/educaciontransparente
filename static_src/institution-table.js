@@ -21,7 +21,7 @@ function institutionDetails() {
             'Fecha Desembolso',
             'Monto Desembolsado',
             'Fecha a rendir',
-            '',
+            'Detalle de rendición',
         ],
         results: [],
         sortCol: 'Año',

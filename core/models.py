@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -98,10 +99,10 @@ class Establishment(ImportantDatesModel):
     )
     address = models.TextField(default="", blank=True, verbose_name="dirección")
     latitude = models.DecimalField(
-        max_digits=9, decimal_places=6, null=True, blank=True
+        max_digits=12, decimal_places=8, null=True, blank=True, verbose_name="latitud"
     )
     longitude = models.DecimalField(
-        max_digits=9, decimal_places=6, null=True, blank=True
+        max_digits=12, decimal_places=8, null=True, blank=True, verbose_name="longitud"
     )
 
     class Meta:
@@ -126,16 +127,24 @@ class Institution(ImportantDatesModel):
     phone_number = models.CharField(
         max_length=50, default="", blank=True, verbose_name="teléfono"
     )
-    website = models.URLField(blank=True, default="", verbose_name="url")
+    website = models.URLField(blank=True, default="", verbose_name="sitio web")
     email = models.EmailField(blank=True, default="", verbose_name="email")
     users = models.ManyToManyField(
-        "users.User", through="InstitutionUser", verbose_name="usuarios"
+        "users.User",
+        through="InstitutionUser",
+        verbose_name="usuarios",
+        related_name="institutions",
     )
 
     class Meta:
         verbose_name = "institución"
         verbose_name_plural = "instituciones"
-        constraints = [UniqueConstraint(fields=("code",), name="unique_institution")]
+        constraints = [
+            UniqueConstraint(
+                fields=("code", "establishment"),
+                name="unique_establishment_institution",
+            )
+        ]
         indexes = [models.Index(fields=["name"])]
 
     def __str__(self):
@@ -192,3 +201,26 @@ class Document(ImportantDatesModel):
         verbose_name = "documento"
         verbose_name_plural = "documentos"
         indexes = [models.Index(fields=["content_type", "object_id"])]
+
+
+class Resource(models.Model):
+    name = models.CharField(verbose_name="nombre", max_length=150)
+    description = models.TextField(verbose_name="descripción", default="", blank=True)
+    url = models.URLField(verbose_name="URL", default="", blank=True)
+    document = models.FileField(
+        upload_to="resources", verbose_name="documento", null=True, blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="creado_el")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="actualizado_el")
+
+    class Meta:
+        verbose_name = "recurso"
+        verbose_name_plural = "recursos"
+        ordering = ("updated_at", "name")
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if not self.url and not self.document:
+            raise ValidationError("Debe agregar una URL o un documento.")

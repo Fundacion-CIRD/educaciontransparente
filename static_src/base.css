@@ -11,6 +11,14 @@
 html, body {
     font-family: "Inter", sans-serif;
     font-optical-sizing: auto;
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-wrap {
+    flex: 1;
 }
 
 .h-100 {
@@ -173,4 +181,13 @@ th i.visible {
     100% {
         transform: rotate(360deg);
     }
+}
+
+.table tr.detail {
+    box-shadow: inset 0 1px 3px #dbdbdb;
+    background: #fafafa;
+}
+
+.table tr.detail .detail-container {
+    padding: 1rem;
 }

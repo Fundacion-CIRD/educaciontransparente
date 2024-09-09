@@ -5,8 +5,11 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
+import core.utils
+import accountability.utils
 
 logger = getLogger(__name__)
 
@@ -28,7 +31,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(
-        self, email: str | None = None, password: str | None = None, **extra_fields: Any
+            self, email: str | None = None, password: str | None = None, **extra_fields: Any
     ) -> "User":
         logger.info("Creating super admin")
         extra_fields.setdefault("is_staff", True)
@@ -61,3 +64,14 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name} ({self.email})".strip()
+
+    def save(self, *args, **kwargs):
+        self.is_staff = True
+        super().save(*args, **kwargs)
+
+
+@receiver(models.signals.post_save, sender=User)
+def add_default_permissions(sender, instance, created, **kwargs):
+    if created:
+        core.utils.add_default_permissions(instance)
+        accountability.utils.add_default_permissions(instance)

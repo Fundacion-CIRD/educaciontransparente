@@ -1,14 +1,15 @@
 import csv
 import json
 
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, ExpressionWrapper, F, IntegerField, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView, TemplateView
 
 from accountability.models import Report, Disbursement, Receipt
-from core.models import Department, Institution
+from core.models import Department, Institution, Resource
 from core.serializers import InstitutionSerializer
 
 
@@ -16,7 +17,13 @@ from core.serializers import InstitutionSerializer
 
 
 def index(request):
-    departments = Department.objects.all()
+    departments = (
+        Department.objects.filter(
+            districts__establishments__institutions__disbursements__isnull=False
+        )
+        .distinct()
+        .order_by("name")
+    )
     return render(
         request,
         context={"departments": departments},
@@ -28,36 +35,62 @@ def quienes_somos(request):
     return render(request, "website/quienes_somos.html")
 
 
+def open_data(request):
+    return render(request, "website/open-data.html")
+
+
 def resources(request):
-    return render(request, "website/resources.html")
+    context = {"resources": Resource.objects.all()}
+    return render(request, "website/resources.html", context)
 
 
-def get_totals(queryset):
-    return queryset.aggregate(
-        total_disbursed=Sum("disbursement__amount_disbursed", distinct=True),
-        total_reported=Sum("receipts__total", distinct=True),
+def get_totals(disbursed_qs, reported_qs):
+    qs = reported_qs.annotate(
+        total_reported=Coalesce(
+            Sum(
+                ExpressionWrapper(
+                    F("receipts__items__unit_price") * F("receipts__items__quantity"),
+                    output_field=IntegerField(),
+                )
+            ),
+            Value(0, output_field=IntegerField()),
+        )
     )
+    return {
+        "disbursed": disbursed_qs.aggregate(
+            disbursed=Sum("amount_disbursed", distinct=True)
+        )["disbursed"],
+        "reported": qs.aggregate(reported=Sum("total_reported", distinct=True))[
+            "reported"
+        ],
+    }
 
 
-def get_yearly_report(queryset):
+def get_yearly_report(disbursed_qs, reported_qs):
     current_year = timezone.now().year
     yearly_report = {}
     for i in range(5):
         year = current_year - i
         total_disbursed_sum = Sum(
-            "disbursement__amount_disbursed",
-            filter=Q(disbursement__disbursement_date__year=year),
+            "amount_disbursed",
+            filter=Q(disbursement_date__year=year),
             distinct=True,
         )
-        total_reported_sum = Sum(
-            "receipts__total",
-            filter=Q(receipts__receipt_date__year=year),
-            distinct=True,
+        total_reported_sum = Coalesce(
+            Sum(
+                ExpressionWrapper(
+                    F("receipts__items__unit_price") * F("receipts__items__quantity"),
+                    output_field=IntegerField(),
+                ),
+                filter=Q(receipts__report__disbursement__disbursement_date__year=year),
+                distinct=True,
+            ),
+            Value(0, output_field=IntegerField()),
         )
-        yearly_report[year] = queryset.aggregate(
-            total_disbursed=total_disbursed_sum,
-            total_reported=total_reported_sum,
-        )
+        yearly_report[year] = {
+            "total_disbursed": disbursed_qs.aggregate(sum=total_disbursed_sum)["sum"],
+            "total_reported": reported_qs.aggregate(sum=total_reported_sum)["sum"],
+        }
     return yearly_report
 
 
@@ -67,9 +100,12 @@ class InstitutionDetailsView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = Report.objects.filter(disbursement__institution=context["object"])
-        context["totals"] = get_totals(qs)
-        context["yearly_report"] = json.dumps(get_yearly_report(qs), default=str)
+        disbursed_qs = Disbursement.objects.filter(institution=context["object"])
+        reported_qs = Report.objects.filter(disbursement__institution=context["object"])
+        context["totals"] = get_totals(disbursed_qs, reported_qs)
+        context["yearly_report"] = json.dumps(
+            get_yearly_report(disbursed_qs, reported_qs), default=str
+        )
         return context
 
 
@@ -80,8 +116,9 @@ class ReportDetailView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["object"] = get_object_or_404(Institution, pk=kwargs["institution_id"])
         context["report"] = get_object_or_404(Report, pk=kwargs.get("report_id"))
-        qs = Report.objects.filter(id=context["report"].id)
-        context["totals"] = get_totals(qs)
+        reported_qs = Report.objects.filter(id=context["report"].id)
+        disbursement_qs = Disbursement.objects.filter(reports__in=reported_qs)
+        context["totals"] = get_totals(disbursement_qs, reported_qs)
         return context
 
 

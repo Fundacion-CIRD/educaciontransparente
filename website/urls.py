@@ -5,6 +5,7 @@ from website import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("quienes-somos/", views.quienes_somos, name="quienes_somos"),
+    path("open-data/", views.open_data, name="open_data"),
     path("recursos/", views.resources, name="resources"),
     path(
         "instituciones/<int:pk>/",

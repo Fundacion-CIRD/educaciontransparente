@@ -2,7 +2,7 @@ from argparse import FileType
 
 from django.core.management import BaseCommand
 
-from core.importer import DataImporter
+from core.processors import DataImporter
 
 
 class Command(BaseCommand):

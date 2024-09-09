@@ -1,66 +1,57 @@
 {% extends 'components/layout.html' %}
 {% load static %}
 
+{#{% block style %}#}
+{#  .card {#}
+{#  display: flex;#}
+{#  flex-direction: column;#}
+{#  justify-content: space-between;#}
+{#  height: 100%;#}
+{#  }#}
+{#{% endblock %}#}
+
 {% block body %}
-  <section class="section" x-data="resourcesData()" x-init="fetchData()">
+  <section class="section">
     <div class="container">
-      <h1 class="title">Recursos</h1>
-      <div class="tabs">
-        <ul>
-          <li :class="collection === 'Instituciones' ? 'is-active' : ''"><a
-            @click.prevent="setCollection('Instituciones')">Instituciones</a></li>
-          <li :class="collection === 'Desembolsos' ? 'is-active' : ''"><a @click.prevent="setCollection('Desembolsos')">Desembolsos</a>
-          </li>
-          <li :class="collection === 'Rendiciones' ? 'is-active' : ''"><a @click.prevent="setCollection('Rendiciones')">Rendiciones</a>
-          </li>
-          <li :class="collection === 'Comprobantes' ? 'is-active' : ''"><a
-            @click.prevent="setCollection('Comprobantes')">Comprobantes</a></li>
-        </ul>
+      <h2 class="title">Recursos</h2>
+      <div class="subtitle my-5">
+        <p>La sección "Recursos" ofrece una selección de materiales útiles sobre el Fondo de Gratuidad del Ministerio de
+          Educación y Ciencias (MEC) de Paraguay. Aquí encontrarás guías, documentos oficiales y herramientas que te
+          ayudarán a entender el fondo, asegurando que los estudiantes elegibles puedan aprovechar las oportunidades
+          educativas de manera eficiente y sin complicaciones.</p>
       </div>
-      <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
-        <h3 class="has-text-weight-semibold is-size-5" x-text="collection"></h3>
-        <div class="is-flex is-gap-1 is-align-items-center">
-          <p>Descargar:</p>
-          <a :href="getExportUrl('csv')" target="_blank" class="button is-small">CSV</a>
-          <a class="button is-small" :href="getExportUrl('json')" target="_blank">JSON</a>
-        </div>
+      <div class="columns is-multiline">
+        {% for resource in resources %}
+          <div class="column is-one-third">
+            <div class="card" x-data="{open: false}">
+              <header class="card-header">
+                <p class="card-header-title">{{ resource.name }}</p>
+                <button class="card-header-icon" @click="open = !open">
+                  <i class="fas" :class="open ? 'fa-angle-up' : 'fa-angle-down'"></i>
+                </button>
+              </header>
+              <div class="card-content" x-show="open" x-transition>
+                <div class="content">
+                  {{ resource.description|safe }}
+                </div>
+              </div>
+              <footer class="card-footer">
+                {% if resource.document %}
+                  <a href="{{ resource.document.url }}" class="card-footer-item"
+                     target="_blank">
+                    Ver <i class="fas fa-arrow-up-right-from-square ml-2"></i>
+                  </a>
+                {% else %}
+                  <a href="{{ resource.url }}" class="card-footer-item"
+                     target="_blank">
+                    Ver <i class="fas fa-arrow-up-right-from-square ml-2"></i>
+                  </a>
+                {% endif %}
+              </footer>
+            </div>
+          </div>
+        {% endfor %}
       </div>
-      <p class="mb-5">Resultados: <span x-text="total"></span></p>
-      <!-- Table to display institution data -->
-      <div class="table-container">
-        <table class="table is-fullwidth is-hoverable">
-          <thead>
-          <tr>
-            <template x-for="header in getHeaders()">
-              <th x-text="header"></th>
-            </template>
-          </tr>
-          </thead>
-          <tbody x-show="!loading">
-          <template x-for="row in mapCollection()" :key="row[0]">
-            <tr>
-              <template x-for="item in row">
-                <td x-text="item"></td>
-              </template>
-            </tr>
-          </template>
-          </tbody>
-        </table>
-      </div>
-      <div x-show="loading" class="container mt-5 has-text-centered">
-        <span class="loader"></span>
-      </div>
-
-
-      <!-- Pagination Buttons -->
-      <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-        <button class="button" :disabled="!previous" @click="fetchData(previous)">Anterior</button>
-        <button class="button" :disabled="!next" @click="fetchData(next)">Siguiente</button>
-      </nav>
     </div>
   </section>
-{% endblock %}
-
-{% block scripts %}
-  <script src="{% static 'resources.js' %}"></script>
 {% endblock %}

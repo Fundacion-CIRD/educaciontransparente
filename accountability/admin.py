@@ -1,14 +1,22 @@
-from django.contrib.admin import register, display
+from django.contrib.admin import (
+    register,
+    display,
+    RelatedFieldListFilter,
+)
+from django.db.models import Sum, ExpressionWrapper, F, IntegerField
 from django.utils.numberformat import format as format_number
-from unfold.admin import ModelAdmin, StackedInline
+from unfold.admin import ModelAdmin, StackedInline, TabularInline
 
 from accountability.models import (
     Disbursement,
     Report,
     ReceiptType,
     Receipt,
-    ReportStatus,
     Resolution,
+    AccountObject,
+    ReceiptItem,
+    OriginDetail,
+    PaymentType,
 )
 from core.admin import DocumentInline
 
@@ -34,7 +42,7 @@ class DisbursementAdmin(ModelAdmin):
     )
     list_filter = ("disbursement_date",)
     search_fields = ("institution__name",)
-    autocomplete_fields = ("institution", "resolution")
+    autocomplete_fields = ("institution", "resolution", "origin_details")
     inlines = [DocumentInline]
     fieldsets = [
         (
@@ -67,37 +75,12 @@ class DisbursementAdmin(ModelAdmin):
         return format_number(obj.amount_disbursed, ",", thousand_sep=".")
 
 
-@register(ReportStatus)
-class ReportStatusAdmin(ModelAdmin):
-    list_display = ("value",)
-    fields = ("value",)
-
-
-class ReceiptInline(StackedInline):
-    model = Receipt
-    extra = 0
-    min_num = 1
-    fieldsets = [
-        (
-            "",
-            {
-                "fields": [
-                    "receipt_type",
-                    ("receipt_number", "receipt_date"),
-                    ("object_of_expenditure", "description", "total"),
-                ]
-            },
-        ),
-        # ("Documentos", {"fields": ["documents"]}),
-    ]
-
-
 @register(Report)
 class ReportAdmin(ModelAdmin):
     list_display = ("disbursement", "status", "delivered_via", "updated_at")
     list_filter = ("status", "updated_at")
-    inlines = [ReceiptInline]
     autocomplete_fields = ("disbursement",)
+    inlines = [DocumentInline]
 
 
 @register(ReceiptType)
@@ -105,12 +88,70 @@ class ReceiptTypeAdmin(ModelAdmin):
     list_display = ("name",)
 
 
+class ReceiptItemInline(TabularInline):
+    model = ReceiptItem
+    fields = (
+        "object_of_expenditure",
+        "quantity",
+        "description",
+        "unit_price",
+    )
+    autocomplete_fields = ("object_of_expenditure",)
+    min_num = 1
+    extra = 0
+
+
 @register(Receipt)
 class ReceiptAdmin(ModelAdmin):
-    list_display = ("receipt_type", "receipt_date", "receipt_number")
-    inlines = [DocumentInline]
+    list_display = (
+        "receipt_type",
+        "receipt_date",
+        "receipt_number",
+        "get_total",
+        "report",
+    )
+    inlines = [ReceiptItemInline, DocumentInline]
+
+    @display(description="Total")
+    def get_total(self, obj):
+        return obj.items.aggregate(
+            total=Sum(
+                ExpressionWrapper(
+                    F("quantity") * F("unit_price"), output_field=IntegerField()
+                )
+            )
+        )["total"]
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
         initial["report"] = Report.objects.last()
         return initial
+
+
+class ParentFilter(RelatedFieldListFilter):
+    def field_choices(self, field, request, model_admin):
+        queryset = AccountObject.objects.filter(parent__isnull=True)
+        return [(obj.pk, str(obj)) for obj in queryset]
+
+
+@register(AccountObject)
+class AccountObjectAdmin(ModelAdmin):
+    list_display = ("key", "value", "parent")
+    list_filter = (("parent", ParentFilter),)
+    search_fields = (
+        "key",
+        "value",
+    )
+    ordering = ("key",)
+
+
+@register(OriginDetail)
+class OriginDetailAdmin(ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
+@register(PaymentType)
+class PaymentTypeAdmin(ModelAdmin):
+    list_display = ("name",)
+    ordering = ("name",)

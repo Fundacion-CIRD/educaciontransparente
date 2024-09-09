@@ -6,7 +6,6 @@ from typing import IO, Literal, Callable
 
 from core.models import Department, District, Locality, Establishment, Institution
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -152,9 +151,9 @@ class DataImporter:
 
         institution, _ = Institution.objects.update_or_create(
             code=code,
+            establishment=establishment,
             defaults={
                 "name": row.get("nombre_institucion", ""),
-                "establishment": establishment,
                 "institution_type": row.get("sector_o_tipo_gestion", "DESCONOCIDO"),
                 "phone_number": row.get("nro_telefono", ""),
                 "website": row.get("paginaweb", ""),
@@ -177,7 +176,10 @@ class DataImporter:
         minutes = minutes.replace(" ", "")
         seconds = seconds.replace(" ", "")
         direction = direction.upper().replace(" ", "")
-        return Decimal(
-            (float(deg) + float(minutes) / 60 + float(seconds) / (60 * 60))
-            * (-1 if direction in ["W", "S"] else 1)
-        )
+        try:
+            return Decimal(
+                (float(deg) + float(minutes) / 60 + float(seconds) / (60 * 60))
+                * (-1 if direction in ["W", "S"] else 1)
+            )
+        except ValueError:
+            return

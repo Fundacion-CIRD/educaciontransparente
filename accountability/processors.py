@@ -1,18 +1,30 @@
 import io
 import logging
 import re
+from datetime import datetime
 from typing import IO
 
-from django.template.defaultfilters import slugify
+from dateutil.relativedelta import relativedelta
 from openpyxl import load_workbook
 
-from accountability.models import Resolution, Disbursement, Report, ReportStatus
+from accountability.models import (
+    Resolution,
+    Disbursement,
+    Report,
+    DisbursementOrigin,
+    OriginDetail,
+    PaymentType,
+    ReceiptType,
+    AccountObject,
+    Receipt,
+    ReceiptItem,
+)
 from core.models import Institution
 
 logger = logging.getLogger(__name__)
 
 
-class AccountabilityProcessor:
+class ExcelProcessor:
     class ProcessingError(Exception):
         def __init__(self, message):
             self.message = f"Error processing file: {message}"
@@ -24,81 +36,218 @@ class AccountabilityProcessor:
         dimensions = self.sheet.dimensions
         _, last_cell = dimensions.split(":")
         self.last_row = int(re.search(r"\d+", last_cell).group())
-        self.last_institution = None
-        self.last_resolution = None
-        self.last_disbursement = None
+        self.institution = None
+        self.resolution = None
+        self.disbursement = None
         self.report = None
-        self.last_voucher = None
-        self.current_row = None
+        self.receipt = None
+        self.funds_origin = None
+        self.origin_details = None
+        self.report_status = None
+        self.disbursement_date = None
+        self.payment_type = None
 
     def process(self):
-        rows = self.sheet[4 : self.last_row]
-        for row in rows:
-            self.current_row = tuple(row)
-            institution = self.get_institution()
+        empty_row_count = 0
+        all_rows = [row for row in self.sheet.rows]
+        for idx, row in enumerate(all_rows[3:1690]):
+            logger.info(f"Processing row {idx}")
+            if all(cell is None for cell in row):
+                empty_row_count += 1
+                if empty_row_count >= 2:
+                    break
+            empty_row_count = 0
+            self.process_receipt(row)
 
-    def get_institution(self):
-        institution_id = self.current_row[1]
-        if self.last_institution and self.last_institution.code == institution_id:
-            return self.last_institution
-        elif not institution_id:
-            return self.last_institution
+    def get_institution(self, row):
+        code = row[1].value
+        establishment_code = row[0].value
+        if not code or not establishment_code:
+            return self.institution
+        if self.institution and (
+            self.institution.code == code
+            and self.institution.establishment.code == establishment_code
+        ):
+            return self.institution
         try:
-            self.last_institution = Institution.objects.get(code=institution_id)
-            return self.last_institution
-        except Institution.DoesNotExist as exc:
-            logger.info(f"Institution with code {institution_id} does not exist.")
-            raise AccountabilityProcessor.ProcessingError(exc)
-        except Institution.MultipleObjectsReturned as exc:
-            logger.info(f"Institution with code {institution_id} has multiple entries.")
-            raise AccountabilityProcessor.ProcessingError(exc)
-
-    def get_resolution(self):
-        year, number = self.current_row[10], self.current_row[8]
-        try:
-            self.last_resolution, _ = Resolution.objects.get_or_create(
-                document_year=year, document_no=number
+            self.institution = Institution.objects.get(
+                code=code, establishment__code=establishment_code
             )
-        except Resolution.MultipleObjectsReturned as exc:
-            logger.info(f"Resolution {number}/{year} has multiple entries.")
-            raise AccountabilityProcessor.ProcessingError(exc)
+            return self.institution
+        except Institution.DoesNotExist:
+            logger.info(
+                f"Institution with code {row[1].value}, establishment code {row[0].value} does not exist."
+            )
+            return None
 
-    def get_disbursement(self):
-        institution = self.get_institution()
-        resolution = self.get_resolution()
-        funds_origin = self.current_row[11]
-        origin_details = self.current_row[12]
-        payment_type = self.current_row[13]
-        payment_date = self.current_row[14]
-        amount_disbursed = self.current_row[15]
-        principal_name = self.current_row[6]
-        principal_issued_id = self.current_row[7]
-        self.last_disbursement, _ = Disbursement.objects.get_or_create(
-            resolution=resolution,
-            institution=institution,
-            funds_origin=funds_origin,
-            origin_details=origin_details,
-            payment_type=payment_type,
-            payment_date=payment_date,
-            amount_disbursed=amount_disbursed,
-            principal_name=principal_name,
-            principal_issued_id=principal_issued_id,
+    def _determine_payment_type(self, payment_type_str: str):
+        if not payment_type_str:
+            return self.payment_type
+        normalized = (payment_type_str or "").lower()
+        if "ch" in normalized:
+            return PaymentType.objects.get_or_create(name="Cheque")[0]
+        if any(keyword in normalized for keyword in ["transf", "cta", "cuenta", "red"]):
+            return PaymentType.objects.get_or_create(name="Transferencia bancaria")[0]
+        self.payment_type, _ = PaymentType.objects.get_or_create(name="Otro")
+        return self.payment_type
+
+    def _get_disbursement_date(self, row):
+        value = row[14].value
+        if not isinstance(value, datetime):
+            return None
+        disbursement_date = value.date() if row[14].value else None
+        # return previous value when no date is found
+        if not disbursement_date:
+            return self.disbursement_date
+        self.disbursement_date = disbursement_date
+        return disbursement_date
+
+    def _get_disbursement_data(self, row) -> dict | None:
+        funds_origin = row[11].value
+        origin_details = row[12].value
+        if funds_origin:
+            self.funds_origin, _ = DisbursementOrigin.objects.get_or_create(
+                code=funds_origin,
+            )
+        if origin_details:
+            self.origin_details, _ = OriginDetail.objects.get_or_create(
+                name=origin_details.strip()
+            )
+        data = {
+            "resolution_amount": row[9].value,
+            "amount_disbursed": row[15].value,
+            "principal_name": row[6].value or "",
+            "principal_issued_id": row[7].value or "",
+            "funds_origin": self.funds_origin,
+            "origin_details": self.origin_details,
+            "payment_type": self._determine_payment_type(row[13].value),
+        }
+        return data
+
+    def get_or_create_disbursement(self, row) -> Disbursement | None:
+        institution = self.get_institution(row)
+        if not institution:
+            return None
+        resolution_no = row[8].value
+        resolution_year = row[10].value
+        if (
+            self.resolution
+            and self.resolution.document_number == resolution_no
+            and self.resolution.document_year == resolution_year
+        ):
+            resolution = self.resolution
+        else:
+            self.resolution, _ = Resolution.objects.get_or_create(
+                document_year=resolution_year,
+                document_number=resolution_no,
+            )
+            resolution = self.resolution
+        data = self._get_disbursement_data(row)
+        if not data:
+            return self.disbursement
+        disbursement_date = self._get_disbursement_date(row)
+        data["due_date"] = (
+            disbursement_date + relativedelta(months=6, days=15)
+            if disbursement_date
+            else None
         )
-        return self.last_disbursement
+        self.disbursement, _ = Disbursement.objects.get_or_create(
+            institution=institution,
+            resolution=resolution,
+            disbursement_date=disbursement_date,
+            defaults=data,
+        )
+        return self.disbursement
 
-    def get_report(self):
-        updated_at = self.current_row[16]
-        status = self.current_row[19]
-        status_code = slugify(status)
-        status, _ = ReportStatus.objects.get_or_create
-        delivered_via = self.current_row[20]
-        comments = self.current_row[21]
+    @staticmethod
+    def _get_balance_and_status(row) -> tuple[int, str]:
+        disbursed_amount = row[15].value
+        reported_amount = row[17].value
+        if disbursed_amount and reported_amount:
+            balance = disbursed_amount - reported_amount
+        else:
+            balance = row[18].value
+        return balance, (
+            Report.ReportStatus.finished.value
+            if balance <= 0
+            else Report.ReportStatus.pending.value
+        )
 
-        disbursement = self.get_disbursement()
+    def get_or_create_report(self, row) -> Report | None:
+        disbursement = self.get_or_create_disbursement(row)
+        if not disbursement:
+            return self.report
+        report_date = (
+            row[16].value.date() if isinstance(row[16].value, datetime) else None
+        )
+        if not report_date:
+            return self.report
+        delivered_via = (row[20].value or "").strip()
+        comments = (row[21].value or "").strip()
+        reported_amount = row[17].value
+        balance, status = self._get_balance_and_status(row)
         self.report, _ = Report.objects.get_or_create(
             disbursement=disbursement,
-            updated_at=updated_at,
-            status=status,
-            delivered_via=delivered_via,
+            defaults={
+                "status": status,
+                "reported_amount": reported_amount,
+                "balance": balance,
+                "delivered_via": delivered_via,
+                "comments": comments,
+                "report_date": report_date,
+            },
         )
         return self.report
+
+    @staticmethod
+    def _get_receipt_type(row) -> ReceiptType | None:
+        receipt_type_str = row[22].value.strip().title() if row[22].value else None
+        if not receipt_type_str:
+            return None
+        receipt_type, _ = ReceiptType.objects.get_or_create(
+            name=receipt_type_str,
+        )
+        return receipt_type
+
+    @staticmethod
+    def _get_object_of_expenditure(row) -> AccountObject | None:
+        obj_no = row[24].value
+        try:
+            return AccountObject.objects.get(key=obj_no)
+        except AccountObject.DoesNotExist:
+            return None
+
+    @staticmethod
+    def _parse_unit_price(unit_price_str):
+        digits = "".join(num for num in re.findall(r"\d+", unit_price_str))
+        return int(digits) if digits else 0
+
+    def process_receipt(self, row):
+        report = self.get_or_create_report(row)
+        receipt_type = self._get_receipt_type(row)
+        if not receipt_type:
+            return
+        receipt_number = (str(row[23].value) or "").strip()
+        object_of_expenditure = self._get_object_of_expenditure(row)
+        description = (row[25].value or "").strip()
+        receipt_date = (
+            row[26].value.date() if isinstance(row[26].value, datetime) else None
+        )
+        unit_price = row[27].value
+        if not unit_price:
+            return
+        if isinstance(unit_price, str):
+            unit_price = self._parse_unit_price(unit_price)
+        receipt, _ = Receipt.objects.get_or_create(
+            report=report,
+            receipt_number=receipt_number,
+            receipt_date=receipt_date,
+            receipt_type=receipt_type,
+        )
+        ReceiptItem.objects.create(
+            receipt=receipt,
+            object_of_expenditure=object_of_expenditure,
+            description=description or "No disponible",
+            unit_price=unit_price,
+            quantity=1,
+        )

@@ -1,5 +1,9 @@
+from django.db import models
 from django.contrib.admin import register, display
+from django.contrib.contenttypes.admin import GenericTabularInline
 from unfold.admin import ModelAdmin, TabularInline
+from unfold.contrib.forms.widgets import WysiwygWidget
+
 from unfold.contrib.inlines.admin import NonrelatedTabularInline
 
 from core.models import (
@@ -10,6 +14,7 @@ from core.models import (
     Locality,
     Establishment,
     Document,
+    Resource,
 )
 
 
@@ -47,13 +52,6 @@ class EstablishmentAdmin(ModelAdmin):
     search_fields = ("code",)
 
 
-class InstitutionUserInline(TabularInline):
-    model = InstitutionUser
-    fields = ("user", "is_manager")
-    extra = 0
-    min_num = 0
-
-
 @register(Institution)
 class InstitutionAdmin(ModelAdmin):
     list_display = (
@@ -67,8 +65,19 @@ class InstitutionAdmin(ModelAdmin):
     )
     search_fields = ("name", "establishment__district__name")
     ordering = ("name",)
-    inlines = (InstitutionUserInline,)
     autocomplete_fields = ("establishment",)
+    fieldsets = [
+        (None, {"fields": ["name", ("code", "institution_type"), "establishment"]}),
+        (
+            "Contacto",
+            {"fields": ["email", "phone_number", "website"]},
+        ),
+    ]
+
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return []
+        return ["establishment", "code", "institution_type", "name"]
 
     @display(description="Distrito", ordering="establishment__district__name")
     def get_district(self, obj):
@@ -94,7 +103,7 @@ class InstitutionAdmin(ModelAdmin):
         }
 
 
-class DocumentInline(NonrelatedTabularInline):
+class DocumentInline(GenericTabularInline, TabularInline):
     model = Document
     fields = ("name", "file")
     extra = 0
@@ -108,3 +117,15 @@ class DocumentInline(NonrelatedTabularInline):
         instance.content_object = parent
         instance.object_id = parent.id
         instance.save()
+
+
+@register(Resource)
+class ResourceAdmin(ModelAdmin):
+    list_display = ("name", "updated_at")
+    search_fields = ("name", "description")
+
+    formfield_overrides = {
+        models.TextField: {
+            "widget": WysiwygWidget,
+        }
+    }

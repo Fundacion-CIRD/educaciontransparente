@@ -1,0 +1,12 @@
+<div class="is-flex is-gap-3">
+  {% for document in documents %}
+    <div class="button is-link is-outlined">
+      <p class="is-size-6 has-text-weight-semibold">
+        <a href="{{ document.file.url }}" target="_blank">
+          {{ document.name }}
+          <i class="fas fa-arrow-up-right-from-square ml-2"></i>
+        </a>
+      </p>
+    </div>
+  {% endfor %}
+</div>

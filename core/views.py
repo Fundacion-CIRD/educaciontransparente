@@ -1,4 +1,5 @@
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, ExpressionWrapper, F, IntegerField, Value
+from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 from django_filters import rest_framework as filters
 
@@ -19,15 +20,10 @@ class InstitutionFilter(filters.FilterSet):
 
 
 class InstitutionViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Institution.objects.all()
+    queryset = Institution.objects.filter(disbursements__isnull=False).distinct()
     serializer_class = InstitutionSerializer
     filterset_class = InstitutionFilter
     search_fields = ("name",)
-
-    def get_queryset(self):
-        return Institution.objects.annotate(
-            disbursement_qty=Count("disbursements")
-        ).filter(disbursement_qty__gt=0)
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
@@ -36,9 +32,21 @@ class InstitutionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_totals(self):
         qs = self.filter_queryset(self.get_queryset())
+        qs = qs.annotate(
+            total_reported=Coalesce(
+                Sum(
+                    ExpressionWrapper(
+                        F("disbursements__reports__receipts__items__unit_price")
+                        * F("disbursements__reports__receipts__items__quantity"),
+                        output_field=IntegerField(),
+                    )
+                ),
+                Value(0, output_field=IntegerField()),
+            )
+        )
         return qs.aggregate(
-            total_disbursed=Sum("disbursements__amount_disbursed"),
-            total_reported=Sum("disbursements__reports__receipts__total"),
+            disbursed=Sum("disbursements__amount_disbursed"),
+            reported=Sum("total_reported"),
         )
 
 
@@ -48,7 +56,9 @@ class DepartmentViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = District.objects.all()
+    queryset = District.objects.filter(
+        establishments__institutions__disbursements__isnull=False
+    ).distinct()
     serializer_class = DistrictSerializer
     filterset_fields = ("department",)
     search_fields = ("name",)
