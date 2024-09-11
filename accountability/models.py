@@ -1,7 +1,9 @@
 import uuid
 from datetime import timedelta
+from tabnanny import verbose
 
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
@@ -157,11 +159,18 @@ class Report(models.Model):
     report_date = models.DateField(
         verbose_name="fecha de rendición", editable=False, null=True
     )
-    balance = models.IntegerField(verbose_name="saldo", null=True)
-    delivered_via = models.CharField(max_length=250, verbose_name="recepción")
+    balance = models.IntegerField(verbose_name="saldo", null=True, editable=False)
+    delivered_via = models.CharField(
+        max_length=250,
+        verbose_name="recepción",
+        help_text="Ej. Recibido por RUE, Mesa de entrada",
+    )
     comments = models.TextField(default="", blank=True, verbose_name="observaciones")
     documents = GenericRelation(
         "core.Document", related_name="report", verbose_name="documentos"
+    )
+    institution = models.ForeignKey(
+        "core.Institution", on_delete=models.CASCADE, null=True, editable=False
     )
 
     class Meta:
@@ -175,6 +184,9 @@ class Report(models.Model):
         except:
             return f"Rendición {self.id} - Des {self.disbursement_id}"
         return f"Rend. s/ des. {disbursement} (venc. {due_date})"
+
+    def clean(self):
+        self.institution = self.disbursement.institution
 
 
 class ReceiptType(models.Model):
@@ -221,6 +233,25 @@ class ReceiptManager(models.Manager):
         )
 
 
+def validate_ruc(value):
+    if len(value) < 4:
+        raise ValidationError("El RUC debe tener al menos 4 caracteres")
+
+
+class Provider(models.Model):
+    ruc = models.CharField(
+        max_length=20, verbose_name="ruc", unique=True, validators=[validate_ruc]
+    )
+    name = models.CharField(max_length=250, verbose_name="Razón social")
+
+    class Meta:
+        verbose_name = "proveedor"
+        verbose_name_plural = "proveedores"
+
+    def __str__(self):
+        return f"{self.name} ({self.ruc})"
+
+
 class Receipt(models.Model):
     report = models.ForeignKey(
         Report,
@@ -238,10 +269,27 @@ class Receipt(models.Model):
     receipt_number = models.CharField(
         verbose_name="número de comprobante", max_length=30
     )
+    provider = models.ForeignKey(
+        Provider, on_delete=models.PROTECT, verbose_name="proveedor", null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     document = models.FileField(
         upload_to="receipts", verbose_name="documento", null=True, blank=True
+    )
+    institution = models.ForeignKey(
+        "core.Institution",
+        on_delete=models.CASCADE,
+        null=True,
+        editable=False,
+        verbose_name="institución",
+    )
+    disbursement = models.ForeignKey(
+        Disbursement,
+        on_delete=models.PROTECT,
+        editable=False,
+        null=True,
+        verbose_name="desembolso",
     )
 
     objects = ReceiptManager()
@@ -252,6 +300,10 @@ class Receipt(models.Model):
 
     def __str__(self):
         return f"{self.receipt_type} nro. {self.receipt_number}"
+
+    def clean(self):
+        self.institution = self.report.institution
+        self.disbursement = self.report.disbursement
 
 
 class ReceiptItemManager(models.Manager):

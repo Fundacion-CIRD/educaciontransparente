@@ -57,6 +57,13 @@ function mapToTreemapData(node) {
   };
 }
 
+function barChartFormatter(params, newline = false) {
+  if (newline) {
+    return `${params.name}\nGs. ${params.value.toLocaleString()}`;
+  }
+  return `${params.name}: Gs. ${params.value.toLocaleString()}`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Bar Chart
   let barChart = echarts.init(document.getElementById('bar-chart'));
@@ -101,7 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const treeData = data.results.map(mapToTreemapData);
       let treemapOption = {
         tooltip: {
-          formatter: '{b}: Gs. {c}'
+          formatter: function (params) {
+            return barChartFormatter(params);
+          },
         },
         legend: {
           orient: 'horizontal',
@@ -113,7 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
           type: 'treemap',
           label: {
             show: true,
-            formatter: '{b}\nGs. {c}',
+            formatter: function (params) {
+              return barChartFormatter(params, true);
+            },
             fontSize: 14,
             position: 'insideTopLeft',
           },

@@ -3,6 +3,7 @@ import sys
 from os import getenv
 from pathlib import Path
 
+from django.urls import reverse_lazy
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -173,6 +174,126 @@ LOGGING = {
 UNFOLD = {
     "SITE_TITLE": "Educación Transparente",
     "SHOW_VIEW_ON_SITE": False,
+    "SIDEBAR": {
+        "navigation": [
+            {
+                "title": "Principal",
+                "items": [
+                    {
+                        "title": "Resoluciones",
+                        "icon": "history_edu",
+                        "link": reverse_lazy(
+                            "admin:accountability_resolution_changelist"
+                        ),
+                    },
+                    {
+                        "title": "Desembolsos",
+                        "icon": "paid",
+                        "link": reverse_lazy(
+                            "admin:accountability_disbursement_changelist"
+                        ),
+                    },
+                    {
+                        "title": "Rendiciones",
+                        "icon": "quick_reference_all",
+                        "link": reverse_lazy("admin:accountability_report_changelist"),
+                    },
+                    {
+                        "title": "Comprobantes",
+                        "icon": "receipt",
+                        "link": reverse_lazy("admin:accountability_receipt_changelist"),
+                    },
+                    {
+                        "title": "Proveedores",
+                        "icon": "receipt",
+                        "link": reverse_lazy(
+                            "admin:accountability_provider_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": "Configuraciones",
+                "items": [
+                    {
+                        "title": "Instituciones",
+                        "icon": "corporate_fare",
+                        "link": reverse_lazy("admin:core_institution_changelist"),
+                    },
+                    {
+                        "title": "Usuarios",
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_user_changelist"),
+                    },
+                    {
+                        "title": "Origen del ingreso",
+                        "icon": "payment",
+                        "link": reverse_lazy(
+                            "admin:accountability_disbursementorigin_changelist"
+                        ),
+                    },
+                    {
+                        "title": "Marcos",
+                        "icon": "book",
+                        "link": reverse_lazy(
+                            "admin:accountability_origindetail_changelist"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": "Administración",
+                "items": [
+                    {
+                        "title": "Recursos",
+                        "icon": "article",
+                        "link": reverse_lazy("admin:core_resource_changelist"),
+                    },
+                    {
+                        "title": "Departamentos",
+                        "icon": "map",
+                        "link": reverse_lazy("admin:core_department_changelist"),
+                    },
+                    {
+                        "title": "Distritos",
+                        "icon": "location_city",
+                        "link": reverse_lazy("admin:core_district_changelist"),
+                    },
+                    {
+                        "title": "Localidades",
+                        "icon": "streetview",
+                        "link": reverse_lazy("admin:core_locality_changelist"),
+                    },
+                    {
+                        "title": "Establecimientos",
+                        "icon": "location_on",
+                        "link": reverse_lazy("admin:core_establishment_changelist"),
+                    },
+                    {
+                        "title": "Objetos de gasto",
+                        "icon": "category",
+                        "link": reverse_lazy(
+                            "admin:accountability_accountobject_changelist"
+                        ),
+                    },
+                    {
+                        "title": "Tipos de pago",
+                        "icon": "attach_money",
+                        "link": reverse_lazy(
+                            "admin:accountability_paymenttype_changelist"
+                        ),
+                    },
+                    {
+                        "title": "Tipos de comprobante",
+                        "icon": "file_present",
+                        "link": reverse_lazy(
+                            "admin:accountability_receipttype_changelist"
+                        ),
+                    },
+                ],
+            },
+        ]
+    },
 }
 
 REST_FRAMEWORK = {

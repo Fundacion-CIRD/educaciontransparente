@@ -17,6 +17,8 @@ from accountability.models import (
     ReceiptItem,
     OriginDetail,
     PaymentType,
+    Provider,
+    DisbursementOrigin,
 )
 from core.admin import DocumentInline
 
@@ -29,6 +31,7 @@ class ResolutionAdmin(ModelAdmin):
     fieldsets = [
         (None, {"fields": ["document_number", "document_year", "document"]}),
     ]
+    compressed_fields = True
 
 
 @register(Disbursement)
@@ -81,24 +84,37 @@ class ReportAdmin(ModelAdmin):
     list_filter = ("status", "updated_at")
     autocomplete_fields = ("disbursement",)
     inlines = [DocumentInline]
+    search_fields = (
+        "disbursement__institution__name",
+        "disbursement__resolution__document_number",
+    )
 
 
 @register(ReceiptType)
 class ReceiptTypeAdmin(ModelAdmin):
     list_display = ("name",)
+    search_fields = ("name",)
 
 
-class ReceiptItemInline(TabularInline):
+class ReceiptItemInline(StackedInline):
     model = ReceiptItem
     fields = (
         "object_of_expenditure",
-        "quantity",
-        "description",
-        "unit_price",
+        (
+            "quantity",
+            "description",
+            "unit_price",
+        ),
     )
     autocomplete_fields = ("object_of_expenditure",)
     min_num = 1
     extra = 0
+
+
+@register(Provider)
+class ProviderAdmin(ModelAdmin):
+    list_display = ("name", "ruc")
+    search_fields = ("name", "ruc")
 
 
 @register(Receipt)
@@ -110,7 +126,24 @@ class ReceiptAdmin(ModelAdmin):
         "get_total",
         "report",
     )
-    inlines = [ReceiptItemInline, DocumentInline]
+    inlines = [ReceiptItemInline]
+    search_fields = ("report__disbursement__institution__name",)
+    autocomplete_fields = ("receipt_type", "report", "provider")
+    compressed_fields = True
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    "report",
+                    "receipt_type",
+                    ("receipt_number", "receipt_date"),
+                    "provider",
+                    "document",
+                ]
+            },
+        )
+    ]
 
     @display(description="Total")
     def get_total(self, obj):
@@ -155,3 +188,9 @@ class OriginDetailAdmin(ModelAdmin):
 class PaymentTypeAdmin(ModelAdmin):
     list_display = ("name",)
     ordering = ("name",)
+
+
+@register(DisbursementOrigin)
+class DisbursementOriginAdmin(ModelAdmin):
+    list_display = ("code",)
+    search_fields = ("code",)

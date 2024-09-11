@@ -45,7 +45,7 @@
               class="p-4 is-size-4 has-text-weight-semibold has-radius-normal"
               style="background-color: hsla(209, 100%, 89%, 1)"
             >
-              Gs. {{ totals.disbursed|format_number }}
+              Gs. <span x-text="formatNumber(summary.totalDisbursed)">{{ totals.disbursed|format_number }}</span>
             </p>
           </div>
           <div class="column">
@@ -54,7 +54,7 @@
               class="p-4 is-size-4 has-text-weight-semibold has-radius-normal"
               style="background-color: hsla(210, 100%, 75%, 1)"
             >
-              Gs. {{ totals.reported|format_number }}
+              Gs. <span x-text="formatNumber(summary.totalReported)">{{ totals.reported|format_number }}</span>
             </p>
           </div>
         </div>

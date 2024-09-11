@@ -1,6 +1,10 @@
+from django.db.models import Sum, ExpressionWrapper, F, Value
+from django.db.models.functions import Coalesce
+from django.db.models import IntegerField
 from django_filters import rest_framework as filters
 
 from rest_framework import viewsets
+from rest_framework.response import Response
 
 from accountability.models import (
     Report,
@@ -41,6 +45,35 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ReportSerializer
     filterset_class = ReportFilter
 
+    def list(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        total_disbursed = (
+            Disbursement.objects.filter(reports__in=qs)
+            .distinct()
+            .aggregate(total=Sum("amount_disbursed"))["total"]
+        )
+        reported_qs = qs.annotate(
+            total_reported=Coalesce(
+                Sum(
+                    ExpressionWrapper(
+                        F("receipts__items__unit_price")
+                        * F("receipts__items__quantity"),
+                        output_field=IntegerField(),
+                    )
+                ),
+                Value(0, output_field=IntegerField()),
+            )
+        )
+        total_reported = reported_qs.aggregate(
+            reported=Sum("total_reported", distinct=True)
+        )["reported"]
+        response_data = super().list(request, *args, **kwargs).data
+        response_data["summary"] = {
+            "total_disbursed": total_disbursed,
+            "total_reported": total_reported,
+        }
+        return Response(data=response_data)
+
 
 class ReceiptViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Receipt.objects.all()
@@ -51,14 +84,43 @@ class AccountObjectChartViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AccountObject.objects.all()
     serializer_class = AccountObjectChartSerializer
 
-    def get_queryset(self):
+    def _get_institution(self):
         institution_id = self.request.GET.get("institution")
-        if not institution_id:
+        try:
+            institution_id = int(institution_id)
+        except (ValueError, TypeError):
+            return None
+        try:
+            return Institution.objects.get(pk=institution_id)
+        except Institution.DoesNotExist:
+            return None
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["year"] = self._get_year()
+        context["institution"] = self._get_institution()
+        return context
+
+    def _get_year(self):
+        year = self.request.GET.get("year", None)
+        try:
+            return int(year)
+        except (ValueError, TypeError):
+            return None
+
+    def get_queryset(self):
+        institution = self._get_institution()
+        year = self._get_year()
+        if not institution or ("year" in self.request.GET.keys() and not year):
             return AccountObject.objects.none()
         leaf_qs = AccountObject.objects.filter(
-            receipt_items__receipt__report__disbursement__institution_id=institution_id
+            receipt_items__receipt__institution=institution
+        )
+        if year:
+            leaf_qs = leaf_qs.filter(receipt_items__receipt__receipt_date__year=year)
+        second_level_qs = AccountObject.objects.filter(
+            children__in=leaf_qs.distinct()
         ).distinct()
-        second_level_qs = AccountObject.objects.filter(children__in=leaf_qs).distinct()
         top_level_qs = AccountObject.objects.filter(
             children__in=second_level_qs
         ).distinct()

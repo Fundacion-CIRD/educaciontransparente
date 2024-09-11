@@ -1,7 +1,7 @@
 {% load web_utils %}
 <section class="section">
   <div class="container">
-    <h3 class="has-text-weight-semibold is-size-4 mb-5">Detalles de rendición</h3>
+    <h3 class="has-text-weight-semibold is-size-4 mb-5">Comprobantes de la rendición</h3>
     <div class="table-container">
       <table class="table is-fullwidth is-striped">
         <thead>
@@ -9,8 +9,9 @@
           <th></th>
           <th>Tipo de comprobante</th>
           <th>Nro. de comprobante</th>
+          <th>Razón Social</th>
+          <th>RUC</th>
           <th>Fecha</th>
-          <th>Objeto del gasto</th>
           <th>Total</th>
           <th>Documento</th>
         </tr>
@@ -26,8 +27,9 @@
             </td>
             <td>{{ receipt.receipt_type.name }}</td>
             <td>{{ receipt.receipt_number }}</td>
-            <td>{{ receipt.receipt_date }}</td>
-            <td>{{ receipt.object_of_expenditure }}</td>
+            <td>{{ receipt.provider.name }}</td>
+            <td>{{ receipt.provider.ruc }}</td>
+            <td>{{ receipt.receipt_date|date:"d/m/Y" }}</td>
             <td class="has-text-right">Gs. {{ receipt.total|format_number }}</td>
             <td class="has-text-centered">
               {% if receipt.document %}
@@ -36,11 +38,12 @@
             </td>
           </tr>
           <tr class="detail" x-show="open" x-transition>
-            <td colspan="7">
+            <td colspan="8">
               <div class="detail-container">
                 <table class="table is-fullwidth">
                   <thead>
                   <tr>
+                    <th>Objeto de gasto</th>
                     <th>Cantidad</th>
                     <th>Concepto</th>
                     <th>Precio Unitario</th>
@@ -50,6 +53,7 @@
                   <tbody>
                   {% for detail in receipt.items.all %}
                     <tr>
+                      <td>{{ detail.object_of_expenditure }}</td>
                       <td class="has-text-right">{{ detail.quantity|format_number:True }}</td>
                       <td>{{ detail.description }}</td>
                       <td class="has-text-right">Gs. {{ detail.unit_price|format_number }}</td>

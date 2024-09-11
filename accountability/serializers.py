@@ -1,4 +1,12 @@
-from django.db.models import Sum, ExpressionWrapper, F, IntegerField, Q, Value
+from django.db.models import (
+    Sum,
+    ExpressionWrapper,
+    F,
+    IntegerField,
+    Q,
+    Value,
+    Expression,
+)
 from django.db.models.functions import Coalesce
 from rest_framework import serializers
 
@@ -10,6 +18,7 @@ from accountability.models import (
     ReceiptType,
     ReceiptItem,
     AccountObject,
+    Provider,
 )
 
 
@@ -82,10 +91,17 @@ class ReceiptItemSerializer(serializers.ModelSerializer):
         )
 
 
+class ProviderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Provider
+        fields = ("ruc", "name")
+
+
 class ReceiptSerializer(serializers.ModelSerializer):
     receipt_type = ReceiptTypeSerializer(read_only=True)
     items = ReceiptItemSerializer(many=True, read_only=True)
     total = serializers.IntegerField(read_only=True)
+    provider = ProviderSerializer(read_only=True)
 
     class Meta:
         model = Receipt
@@ -95,6 +111,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
             "receipt_type",
             "receipt_date",
             "receipt_number",
+            "provider",
             "total",
             "items",
         )
@@ -109,27 +126,41 @@ class AccountObjectChartSerializer(serializers.ModelSerializer):
         fields = ["key", "value", "children", "total_expenditure"]
 
     def get_children(self, obj):
-        if obj.children.exists():
-            qs = obj.children.filter(receipt_items__isnull=False).distinct()
-            if qs.exists():
-                return AccountObjectChartSerializer(instance=qs, many=True).data
-        return None
+        year = self.context.get("year")
+        if not obj.children.exists():
+            return None
+        if not obj.parent:
+            qs = obj.children.filter(
+                children__receipt_items__receipt__institution=self.context[
+                    "institution"
+                ]
+            )
+            if year:
+                qs = qs.filter(children__receipt_items__receipt__date__year=year)
+        else:
+            qs = obj.children.filter(
+                receipt_items__receipt__institution=self.context["institution"]
+            )
+            if year:
+                qs = qs.filter(receipt_items__receipt__date__year=year)
+        return AccountObjectChartSerializer(
+            instance=qs.distinct(), many=True, context=self.context
+        ).data
 
     def get_total_expenditure(self, obj):
         if not obj.children.exists():
-            agg_func = Coalesce(
-                Sum(
-                    ExpressionWrapper(
-                        F("unit_price") * F("quantity"),
-                        output_field=IntegerField(),
-                    ),
-                    distinct=True,
-                ),
-                Value(0, output_field=IntegerField()),
+            qs = ReceiptItem.objects.filter(
+                object_of_expenditure=obj,
+                receipt__institution=self.context["institution"],
+            ).distinct()
+            if self.context.get("year"):
+                qs = qs.filter(receipt__receipt__date__year=self.context.get("year"))
+            qs = qs.annotate(
+                subtotal=ExpressionWrapper(
+                    F("unit_price") * F("quantity"),
+                    output_field=IntegerField(),
+                )
             )
-            total_expenditure = ReceiptItem.objects.filter(
-                object_of_expenditure=obj
-            ).aggregate(total=agg_func)["total"]
-            if total_expenditure:
-                return total_expenditure
+            total = qs.aggregate(total=Sum("subtotal"))["total"]
+            return total
         return None

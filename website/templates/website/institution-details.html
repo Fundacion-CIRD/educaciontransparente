@@ -28,54 +28,56 @@
     <section class="section">
       <div class="container">
         <h3 class="is-size-3 mb-4 has-text-weight-semibold">Desembolsos y Rendiciones</h3>
-        <table class="table is-striped is-fullwidth is-hoverable">
-          <thead>
-          <tr>
-            <template x-for="header in headers" :key="header">
-              <th value="header" @click="sortBy(header)">
-                <span x-text="header"></span>&nbsp;
-                {#                <i#}
-                {#                  :class="{'fas': true, 'fa-chevron-up': !sortDesc, 'fa-chevron-down': sortDesc, 'visible': sortCol === header}"#}
-                {#                  class="fas fa-chevron-up"></i>#}
-              </th>
-            </template>
-          </tr>
-          </thead>
-          <tbody>
-          <template x-for="report in results" :key="report.id">
+        <div class="table-container">
+          <table class="table is-striped is-fullwidth is-hoverable">
+            <thead>
             <tr>
-              <td class="has-text-centered" x-text="report.disbursement.resolution.documentYear"></td>
-              <td x-text="report.disbursement.principalName"></td>
-              <td class="has-text-right" x-text="formatNumber(report.disbursement.principalIssuedId)"></td>
-              <td class="has-text-centered">
-                <template x-if="report.disbursement.resolution.document">
-                  <a :href="report.disbursement.resolution.document">
+              <template x-for="header in headers" :key="header">
+                <th value="header" @click="sortBy(header)">
+                  <span x-text="header"></span>&nbsp;
+                  {#                <i#}
+                  {#                  :class="{'fas': true, 'fa-chevron-up': !sortDesc, 'fa-chevron-down': sortDesc, 'visible': sortCol === header}"#}
+                  {#                  class="fas fa-chevron-up"></i>#}
+                </th>
+              </template>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="report in results" :key="report.id">
+              <tr>
+                <td class="has-text-centered" x-text="report.disbursement.resolution.documentYear"></td>
+                <td x-text="report.disbursement.principalName"></td>
+                <td class="has-text-right" x-text="formatNumber(report.disbursement.principalIssuedId)"></td>
+                <td class="has-text-centered">
+                  <template x-if="report.disbursement.resolution.document">
+                    <a :href="report.disbursement.resolution.document">
                   <span
                     x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></span>
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                  </a>
-                </template>
-                <template x-if="!report.disbursement.resolution.document">
+                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                  </template>
+                  <template x-if="!report.disbursement.resolution.document">
                   <span
                     x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></span>
-                </template>
-              </td>
-              <td class="has-text-right"
-                  x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
-              <td class="has-text-centered" x-text="formatDate(report.disbursement.disbursementDate)"></td>
-              <td class="has-text-right"
-                  x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
-              <td class="has-text-centered">
+                  </template>
+                </td>
+                <td class="has-text-right"
+                    x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
+                <td class="has-text-centered" x-text="formatDate(report.disbursement.disbursementDate)"></td>
+                <td class="has-text-right"
+                    x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
+                <td class="has-text-centered">
                 <span :class="tagColor(report.disbursement.dueDate)"
                       x-text="formatDate(report.disbursement.dueDate)"></span>
-              </td>
-              <td class="has-text-centered">
-                <a :href="`/instituciones/${report.disbursement.institutionId}/rendiciones/${report.id}/`">Ver</a>
-              </td>
-            </tr>
-          </template>
-          </tbody>
-        </table>
+                </td>
+                <td class="has-text-centered">
+                  <a :href="`/instituciones/${report.disbursement.institutionId}/rendiciones/${report.id}/`">Ver</a>
+                </td>
+              </tr>
+            </template>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   </div>
