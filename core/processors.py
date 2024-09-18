@@ -152,8 +152,8 @@ class DataImporter:
         institution, _ = Institution.objects.update_or_create(
             code=code,
             establishment=establishment,
+            name=row.get("nombre_institucion", ""),
             defaults={
-                "name": row.get("nombre_institucion", ""),
                 "institution_type": row.get("sector_o_tipo_gestion", "DESCONOCIDO"),
                 "phone_number": row.get("nro_telefono", ""),
                 "website": row.get("paginaweb", ""),

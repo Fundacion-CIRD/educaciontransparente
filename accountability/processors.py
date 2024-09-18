@@ -29,10 +29,10 @@ class ExcelProcessor:
         def __init__(self, message):
             self.message = f"Error processing file: {message}"
 
-    def __init__(self, file: IO):
+    def __init__(self, file: IO, sheet_name="General"):
         _file = io.BytesIO(file.read())
         self.workbook = load_workbook(filename=_file, data_only=True)
-        self.sheet = self.workbook["General"]
+        self.sheet = self.workbook[sheet_name]
         dimensions = self.sheet.dimensions
         _, last_cell = dimensions.split(":")
         self.last_row = int(re.search(r"\d+", last_cell).group())
@@ -50,14 +50,17 @@ class ExcelProcessor:
     def process(self):
         empty_row_count = 0
         all_rows = [row for row in self.sheet.rows]
-        for idx, row in enumerate(all_rows[3:1690]):
-            logger.info(f"Processing row {idx}")
+        for idx, row in enumerate(all_rows[3:485]):
+            logger.info(f"Processing row {idx + 1}")
             if all(cell is None for cell in row):
                 empty_row_count += 1
                 if empty_row_count >= 2:
                     break
             empty_row_count = 0
-            self.process_receipt(row)
+            try:
+                self.get_or_create_report(row)
+            except Exception as e:
+                logger.info(f"Error in line {idx + 1}: {e}", exc_info=True)
 
     def get_institution(self, row):
         code = row[1].value
@@ -77,6 +80,17 @@ class ExcelProcessor:
         except Institution.DoesNotExist:
             logger.info(
                 f"Institution with code {row[1].value}, establishment code {row[0].value} does not exist."
+            )
+            return None
+        except Institution.MultipleObjectsReturned:
+            try:
+                self.institution = Institution.objects.get(
+                    code=code, establishment__code=establishment_code, name=row[3].value
+                )
+            except Institution.DoesNotExist:
+                pass
+            logger.info(
+                f"Institution with code {row[1].value}, establishment code {row[0].value} returned more than one object"
             )
             return None
 
@@ -184,14 +198,12 @@ class ExcelProcessor:
             return self.report
         delivered_via = (row[20].value or "").strip()
         comments = (row[21].value or "").strip()
-        reported_amount = row[17].value
-        balance, status = self._get_balance_and_status(row)
+        # reported_amount = row[17].value
+        _, status = self._get_balance_and_status(row)
         self.report, _ = Report.objects.get_or_create(
             disbursement=disbursement,
             defaults={
                 "status": status,
-                "reported_amount": reported_amount,
-                "balance": balance,
                 "delivered_via": delivered_via,
                 "comments": comments,
                 "report_date": report_date,
@@ -213,6 +225,10 @@ class ExcelProcessor:
     def _get_object_of_expenditure(row) -> AccountObject | None:
         obj_no = row[24].value
         try:
+            obj_no = int(obj_no)
+        except ValueError:
+            return None
+        try:
             return AccountObject.objects.get(key=obj_no)
         except AccountObject.DoesNotExist:
             return None
@@ -224,6 +240,9 @@ class ExcelProcessor:
 
     def process_receipt(self, row):
         report = self.get_or_create_report(row)
+        receipt_number = (str(row[23].value) or "").strip()
+        if receipt_number.lower() == "rendido sin movimiento":
+            return
         receipt_type = self._get_receipt_type(row)
         if not receipt_type:
             return

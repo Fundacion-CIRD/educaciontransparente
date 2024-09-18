@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-  <div x-data="institutionDetails" x-init="fetchResults()">
+  <div x-data="institutionDetails">
     {% include 'components/institution-header.html' %}
 
     <section class="section">
@@ -10,6 +10,7 @@
         <div class="columns is-gapless">
           <!-- Left Column - Horizontal Bar Chart -->
           <div class="column is-half">
+            <h4 class="is-size-5 has-text-weight-medium mb-3">Recibido vs Rendido por año</h4>
             <div id="bar-chart" class="chart-container"></div>
           </div>
 
@@ -18,6 +19,7 @@
 
           <!-- Right Column - Icicle Chart -->
           <div class="column is-half">
+            <h4 class="is-size-5 has-text-weight-medium mb-3">Totales según objeto de gasto</h4>
             <div id="icicle-chart" class="chart-container"></div>
           </div>
         </div>
@@ -62,7 +64,7 @@
                   </template>
                 </td>
                 <td class="has-text-right"
-                    x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
+                    x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.resolutionAmount)"></td>
                 <td class="has-text-centered" x-text="formatDate(report.disbursement.disbursementDate)"></td>
                 <td class="has-text-right"
                     x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
@@ -88,6 +90,7 @@
   <script>
     var yearlyReport = {{ yearly_report|safe }}
   </script>
-  <script src="{% static 'charts.js' %}"></script>
-  <script src="{% static 'institution-table.js' %}"></script>
+  {#  <script src="{% static 'institution-table.js' %}"></script>#}
+  {#  <script src="{% static 'charts.js' %}"></script>#}
+  <script src="{% static 'institution-details.js' %}"></script>
 {% endblock %}

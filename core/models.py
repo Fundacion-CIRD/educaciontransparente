@@ -121,7 +121,7 @@ class Institution(ImportantDatesModel):
         related_name="institutions",
         verbose_name="establecimiento",
     )
-    code = models.BigIntegerField(verbose_name="código")
+    code = models.CharField(verbose_name="código", max_length=12)
     name = models.CharField(max_length=500, verbose_name="nombre")
     institution_type = models.CharField(max_length=50, verbose_name="tipo")
     phone_number = models.CharField(
@@ -141,7 +141,7 @@ class Institution(ImportantDatesModel):
         verbose_name_plural = "instituciones"
         constraints = [
             UniqueConstraint(
-                fields=("code", "establishment"),
+                fields=("code", "establishment", "name"),
                 name="unique_establishment_institution",
             )
         ]

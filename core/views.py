@@ -1,4 +1,4 @@
-from django.db.models import Count, Sum, ExpressionWrapper, F, IntegerField, Value
+from django.db.models import Sum, ExpressionWrapper, F, IntegerField, Value
 from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 from django_filters import rest_framework as filters
@@ -17,6 +17,7 @@ class InstitutionFilter(filters.FilterSet):
         field_name="establishment__locality__district__department_id"
     )
     id = filters.NumberFilter(field_name="id")
+    institution_type = filters.CharFilter()
 
 
 class InstitutionViewSet(viewsets.ReadOnlyModelViewSet):

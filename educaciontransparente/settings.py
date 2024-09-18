@@ -157,13 +157,17 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        "console_debug": {
-            "level": "DEBUG",
-            "filters": ["require_debug_true"],
-            "class": "logging.StreamHandler",
-        },
+        # "console_debug": {
+        #     "level": "DEBUG",
+        #     "filters": ["require_debug_true"],
+        #     "class": "logging.StreamHandler",
+        # },
     },
     "loggers": {
+        # "django.db.backends": {
+        #     "level": "DEBUG",
+        #     "handlers": ["console_debug"],
+        # },
         "": {
             "handlers": ["console"],
             "level": getenv("LOG_LEVEL", "INFO"),
@@ -185,6 +189,9 @@ UNFOLD = {
                         "link": reverse_lazy(
                             "admin:accountability_resolution_changelist"
                         ),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_resolution"
+                        ),
                     },
                     {
                         "title": "Desembolsos",
@@ -192,22 +199,34 @@ UNFOLD = {
                         "link": reverse_lazy(
                             "admin:accountability_disbursement_changelist"
                         ),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_disbursement"
+                        ),
                     },
                     {
                         "title": "Rendiciones",
                         "icon": "quick_reference_all",
                         "link": reverse_lazy("admin:accountability_report_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_report"
+                        ),
                     },
                     {
                         "title": "Comprobantes",
                         "icon": "receipt",
                         "link": reverse_lazy("admin:accountability_receipt_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_receipt"
+                        ),
                     },
                     {
                         "title": "Proveedores",
                         "icon": "receipt",
                         "link": reverse_lazy(
                             "admin:accountability_provider_changelist"
+                        ),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_provider"
                         ),
                     },
                 ],
@@ -219,11 +238,17 @@ UNFOLD = {
                         "title": "Instituciones",
                         "icon": "corporate_fare",
                         "link": reverse_lazy("admin:core_institution_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_institution"
+                        ),
                     },
                     {
                         "title": "Usuarios",
                         "icon": "person",
                         "link": reverse_lazy("admin:users_user_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_user"
+                        ),
                     },
                     {
                         "title": "Origen del ingreso",
@@ -231,12 +256,18 @@ UNFOLD = {
                         "link": reverse_lazy(
                             "admin:accountability_disbursementorigin_changelist"
                         ),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_disbursementorigin"
+                        ),
                     },
                     {
                         "title": "Marcos",
                         "icon": "book",
                         "link": reverse_lazy(
                             "admin:accountability_origindetail_changelist"
+                        ),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_origindetail"
                         ),
                     },
                 ],
@@ -248,39 +279,48 @@ UNFOLD = {
                         "title": "Recursos",
                         "icon": "article",
                         "link": reverse_lazy("admin:core_resource_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
                     },
                     {
                         "title": "Departamentos",
                         "icon": "map",
                         "link": reverse_lazy("admin:core_department_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
                     },
                     {
                         "title": "Distritos",
                         "icon": "location_city",
                         "link": reverse_lazy("admin:core_district_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
                     },
                     {
                         "title": "Localidades",
                         "icon": "streetview",
                         "link": reverse_lazy("admin:core_locality_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
                     },
                     {
                         "title": "Establecimientos",
                         "icon": "location_on",
                         "link": reverse_lazy("admin:core_establishment_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
                     },
                     {
                         "title": "Objetos de gasto",
                         "icon": "category",
                         "link": reverse_lazy(
-                            "admin:accountability_accountobject_changelist"
+                            "admin:accountability_accountobject_changelist",
                         ),
+                        "permission": lambda request: request.user.is_superuser,
                     },
                     {
                         "title": "Tipos de pago",
                         "icon": "attach_money",
                         "link": reverse_lazy(
                             "admin:accountability_paymenttype_changelist"
+                        ),
+                        "permission": lambda request: request.user.has_perm(
+                            "accountability.view_paymenttype"
                         ),
                     },
                     {

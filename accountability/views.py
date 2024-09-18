@@ -24,10 +24,12 @@ from core.models import Institution
 
 class ReportFilter(filters.FilterSet):
     institution = filters.ModelChoiceFilter(
-        field_name="disbursement__institution_id", queryset=Institution.objects.all()
+        queryset=Institution.objects.filter(reports__isnull=False).distinct(),
+        label="Institución",
     )
+
     year = filters.NumberFilter(
-        field_name="disbursement__disbursement_date__year",
+        field_name="disbursement__disbursement_date__year", label="Año"
     )
 
     class Meta:

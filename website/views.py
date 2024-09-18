@@ -103,9 +103,10 @@ class InstitutionDetailsView(DetailView):
         disbursed_qs = Disbursement.objects.filter(institution=context["object"])
         reported_qs = Report.objects.filter(disbursement__institution=context["object"])
         context["totals"] = get_totals(disbursed_qs, reported_qs)
-        context["yearly_report"] = json.dumps(
-            get_yearly_report(disbursed_qs, reported_qs), default=str
-        )
+        yearly_report = get_yearly_report(disbursed_qs, reported_qs)
+        context["yearly_report"] = json.dumps(yearly_report, default=str)
+        context["years"] = yearly_report.keys()
+        print(context["years"])
         return context
 
 

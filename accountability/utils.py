@@ -11,29 +11,32 @@ from accountability.models import (
     ReceiptItem,
     DisbursementOrigin,
     OriginDetail,
+    PaymentType,
+    Provider,
 )
 
 
-def add_account_object_permissions(user):
-    content_type = ContentType.objects.get_for_model(AccountObject)
+def add_view_permissions(user, *models):
+    content_type = ContentType.objects.get_for_models(models)
     permissions = Permission.objects.filter(
         codename__startswith="view",
-        content_type=content_type,
+        content_type__in=content_type,
     )
     user.user_permissions.add(*permissions)
 
 
 def add_default_permissions(user):
-    add_account_object_permissions(user)
+    add_view_permissions(user, AccountObject, DisbursementOrigin)
     content_types = ContentType.objects.get_for_models(
         Resolution,
-        DisbursementOrigin,
         OriginDetail,
+        PaymentType,
         Disbursement,
         Report,
         ReceiptType,
         Receipt,
         ReceiptItem,
+        Provider,
     )
     permissions = Permission.objects.filter(
         content_type__in=content_types.values(),

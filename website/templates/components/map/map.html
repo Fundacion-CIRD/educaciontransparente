@@ -15,7 +15,8 @@
             <select name="department" id="departmentSelect" class="control" @change="selectDepartment($event)">
               <option value="">TODOS</option>
               {% for department in departments %}
-                <option value="{{ department.id }}">{{ department.name }}</option>
+                <option data-department="{{ department.code }}"
+                        value="{{ department.id }}">{{ department.name }}</option>
               {% endfor %}
             </select>
           </div>

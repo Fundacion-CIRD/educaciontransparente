@@ -43,14 +43,7 @@ function institutionDetails() {
     },
     setYear(event) {
       this.year = event.target.value || null;
-      this.fetchResults();
-    },
-    sortBy(sort) {
-      // if (sort) {
-      //     this.sortDesc = this.sortCol === sort ? !this.sortDesc : true;
-      //     this.sortCol = sort;
-      //     this.fetchResults();
-      // }
+      void this.fetchResults();
     },
     formatDate(dateStr) {
       const [year, month, day] = dateStr.split('-');

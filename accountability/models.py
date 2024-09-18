@@ -1,11 +1,11 @@
-import uuid
 from datetime import timedelta
-from tabnanny import verbose
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.text import slugify
+from django.db.models.functions import Coalesce
+
+INSTITUTION_MODEL = "core.Institution"
 
 
 class Resolution(models.Model):
@@ -72,7 +72,7 @@ class Disbursement(models.Model):
         verbose_name="resolución",
     )
     institution = models.ForeignKey(
-        "core.Institution",
+        INSTITUTION_MODEL,
         on_delete=models.CASCADE,
         related_name="disbursements",
         verbose_name="institución",
@@ -126,12 +126,13 @@ class Disbursement(models.Model):
     def __str__(self):
         try:
             return f"Des. resol. {self.resolution} ({self.disbursement_date.strftime('%d/%m/%Y')}): {self.institution.name}"
-        except:
+        except Exception:
             return f"Desembolso {self.id}: {self.institution.name}"
 
-    def clean(self):
-        if not self.due_date:
+    def save(self, *args, **kwargs):
+        if not self.due_date and self.disbursement_date:
             self.due_date = self.disbursement_date + timedelta(days=105)
+        super().save(*args, **kwargs)
 
 
 class Report(models.Model):
@@ -153,13 +154,9 @@ class Report(models.Model):
         default=ReportStatus.pending,
         editable=False,
     )
-    reported_amount = models.PositiveIntegerField(
-        verbose_name="monto rendido", null=True, editable=False
-    )
     report_date = models.DateField(
         verbose_name="fecha de rendición", editable=False, null=True
     )
-    balance = models.IntegerField(verbose_name="saldo", null=True, editable=False)
     delivered_via = models.CharField(
         max_length=250,
         verbose_name="recepción",
@@ -170,7 +167,11 @@ class Report(models.Model):
         "core.Document", related_name="report", verbose_name="documentos"
     )
     institution = models.ForeignKey(
-        "core.Institution", on_delete=models.CASCADE, null=True, editable=False
+        INSTITUTION_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        editable=False,
+        related_name="reports",
     )
 
     class Meta:
@@ -181,12 +182,13 @@ class Report(models.Model):
         try:
             disbursement = self.disbursement.disbursement_date.strftime("%d/%m/%Y")
             due_date = self.disbursement.due_date.strftime("%d/%m/%Y")
-        except:
+        except Exception:
             return f"Rendición {self.id} - Des {self.disbursement_id}"
         return f"Rend. s/ des. {disbursement} (venc. {due_date})"
 
-    def clean(self):
+    def save(self, *args, **kwargs):
         self.institution = self.disbursement.institution
+        super().save(*args, **kwargs)
 
 
 class ReceiptType(models.Model):
@@ -224,7 +226,7 @@ class ReceiptManager(models.Manager):
     def get_queryset(self):
         qs = super().get_queryset()
         return qs.annotate(
-            total=models.Sum(
+            receipt_total=models.Sum(
                 models.ExpressionWrapper(
                     models.F("items__unit_price") * models.F("items__quantity"),
                     output_field=models.FloatField(),
@@ -278,7 +280,7 @@ class Receipt(models.Model):
         upload_to="receipts", verbose_name="documento", null=True, blank=True
     )
     institution = models.ForeignKey(
-        "core.Institution",
+        INSTITUTION_MODEL,
         on_delete=models.CASCADE,
         null=True,
         editable=False,
@@ -301,9 +303,10 @@ class Receipt(models.Model):
     def __str__(self):
         return f"{self.receipt_type} nro. {self.receipt_number}"
 
-    def clean(self):
+    def save(self, *args, **kwargs):
         self.institution = self.report.institution
         self.disbursement = self.report.disbursement
+        super().save(*args, **kwargs)
 
 
 class ReceiptItemManager(models.Manager):

@@ -57,6 +57,7 @@ class DisbursementAdmin(ModelAdmin):
             {
                 "fields": [
                     "resolution",
+                    "resolution_amount",
                     "disbursement_date",
                     "amount_disbursed",
                     "funds_origin",

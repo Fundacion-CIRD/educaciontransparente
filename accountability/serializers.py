@@ -3,14 +3,11 @@ from django.db.models import (
     ExpressionWrapper,
     F,
     IntegerField,
-    Q,
-    Value,
-    Expression,
 )
-from django.db.models.functions import Coalesce
 from rest_framework import serializers
 
 from accountability.models import (
+    DisbursementOrigin,
     Report,
     Disbursement,
     Resolution,
@@ -19,6 +16,8 @@ from accountability.models import (
     ReceiptItem,
     AccountObject,
     Provider,
+    OriginDetail,
+    PaymentType,
 )
 
 
@@ -28,8 +27,29 @@ class ResolutionSerializer(serializers.ModelSerializer):
         fields = ("document_number", "document_year", "document")
 
 
+class DisbursementOriginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DisbursementOrigin
+        fields = ("code",)
+
+
+class OriginDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OriginDetail
+        fields = ("name",)
+
+
+class PaymentTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentType
+        fields = ("name",)
+
+
 class DisbursementSerializer(serializers.ModelSerializer):
     resolution = ResolutionSerializer()
+    funds_origin = DisbursementOriginSerializer(read_only=True)
+    origin_details = OriginDetailSerializer(read_only=True)
+    payment_type = PaymentTypeSerializer(read_only=True)
     institution_id = serializers.PrimaryKeyRelatedField(read_only=True)
     institution_name = serializers.CharField(source="institution.name", read_only=True)
 
@@ -38,6 +58,7 @@ class DisbursementSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "resolution",
+            "resolution_amount",
             "disbursement_date",
             "amount_disbursed",
             "funds_origin",
@@ -52,11 +73,36 @@ class DisbursementSerializer(serializers.ModelSerializer):
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    disbursement = DisbursementSerializer()
+    reported_amount = serializers.SerializerMethodField()
+    balance = serializers.SerializerMethodField()
+    disbursement = DisbursementSerializer(read_only=True)
 
     class Meta:
         model = Report
-        fields = ("id", "updated_at", "disbursement", "status", "delivered_via")
+        fields = (
+            "id",
+            "updated_at",
+            "institution_id",
+            "disbursement",
+            "status",
+            "reported_amount",
+            "balance",
+            "delivered_via",
+            "comments",
+        )
+
+    @staticmethod
+    def get_reported_amount(obj):
+        return obj.receipts.aggregate(
+            total=Sum("receipt_total", output_field=IntegerField())
+        )["total"]
+
+    def get_balance(self, obj):
+        reported = self.get_reported_amount(obj)
+        disbursed = obj.disbursement.amount_disbursed
+        if not disbursed or not reported:
+            return None
+        return disbursed - reported
 
 
 class ReceiptTypeSerializer(serializers.ModelSerializer):
@@ -83,7 +129,6 @@ class ReceiptItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReceiptItem
         fields = (
-            "id",
             "quantity",
             "description",
             "unit_price",
@@ -100,7 +145,6 @@ class ProviderSerializer(serializers.ModelSerializer):
 class ReceiptSerializer(serializers.ModelSerializer):
     receipt_type = ReceiptTypeSerializer(read_only=True)
     items = ReceiptItemSerializer(many=True, read_only=True)
-    total = serializers.IntegerField(read_only=True)
     provider = ProviderSerializer(read_only=True)
 
     class Meta:
@@ -112,7 +156,8 @@ class ReceiptSerializer(serializers.ModelSerializer):
             "receipt_date",
             "receipt_number",
             "provider",
-            "total",
+            "institution_id",
+            "disbursement_id",
             "items",
         )
 
@@ -136,13 +181,15 @@ class AccountObjectChartSerializer(serializers.ModelSerializer):
                 ]
             )
             if year:
-                qs = qs.filter(children__receipt_items__receipt__date__year=year)
+                qs = qs.filter(
+                    children__receipt_items__receipt__receipt_date__year=year
+                )
         else:
             qs = obj.children.filter(
                 receipt_items__receipt__institution=self.context["institution"]
             )
             if year:
-                qs = qs.filter(receipt_items__receipt__date__year=year)
+                qs = qs.filter(receipt_items__receipt__receipt_date__year=year)
         return AccountObjectChartSerializer(
             instance=qs.distinct(), many=True, context=self.context
         ).data
@@ -154,7 +201,7 @@ class AccountObjectChartSerializer(serializers.ModelSerializer):
                 receipt__institution=self.context["institution"],
             ).distinct()
             if self.context.get("year"):
-                qs = qs.filter(receipt__receipt__date__year=self.context.get("year"))
+                qs = qs.filter(receipt__receipt_date__year=self.context.get("year"))
             qs = qs.annotate(
                 subtotal=ExpressionWrapper(
                     F("unit_price") * F("quantity"),
