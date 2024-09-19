@@ -18,6 +18,7 @@ from accountability.serializers import (
     DisbursementSerializer,
     ReceiptSerializer,
     AccountObjectChartSerializer,
+    ReceiptItemSerializer,
 )
 from core.models import Institution
 
@@ -80,6 +81,11 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
 class ReceiptViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
+
+
+class ReceiptItemViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ReceiptItem.objects.all()
+    serializer_class = ReceiptItemSerializer
 
 
 class AccountObjectChartViewSet(viewsets.ReadOnlyModelViewSet):

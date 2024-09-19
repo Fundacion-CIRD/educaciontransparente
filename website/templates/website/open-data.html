@@ -2,63 +2,108 @@
 {% load static %}
 
 {% block body %}
-  <section class="section" x-data="resourcesData()" x-init="fetchData()">
-    <div class="container">
-      <h1 class="title">Recursos</h1>
-      <div class="tabs">
-        <ul>
-          <li :class="collection === 'Instituciones' ? 'is-active' : ''"><a
-            @click.prevent="setCollection('Instituciones')">Instituciones</a></li>
-          <li :class="collection === 'Desembolsos' ? 'is-active' : ''"><a @click.prevent="setCollection('Desembolsos')">Desembolsos</a>
-          </li>
-          <li :class="collection === 'Rendiciones' ? 'is-active' : ''"><a @click.prevent="setCollection('Rendiciones')">Rendiciones</a>
-          </li>
-          <li :class="collection === 'Comprobantes' ? 'is-active' : ''"><a
-            @click.prevent="setCollection('Comprobantes')">Comprobantes</a></li>
-        </ul>
+  <div x-data="resourcesData()" x-init="fetchData()">
+    <div class="is-background-primary">
+      <div class="container py-5">
+        <h2 class="title is-color-white">Datos abiertos</h2>
       </div>
-      <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
-        <h3 class="has-text-weight-semibold is-size-5" x-text="collection"></h3>
-        <div class="is-flex is-gap-1 is-align-items-center">
-          <p class="has-text-weight-semibold">Descargar:</p>
-          <a :href="getExportUrl('csv')" target="_blank" class="button is-small">CSV</a>
-          <a class="button is-small" :href="getExportUrl('json')" target="_blank">JSON</a>
+    </div>
+    <section class="section">
+      <div class="container">
+        <div class="tabs">
+          <ul>
+            <li :class="collection === 'Instituciones' ? 'is-active' : ''"><a
+              @click.prevent="setCollection('Instituciones')">Instituciones</a></li>
+            <li :class="collection === 'Desembolsos' ? 'is-active' : ''"><a
+              @click.prevent="setCollection('Desembolsos')">Desembolsos</a>
+            </li>
+            <li :class="collection === 'Rendiciones' ? 'is-active' : ''"><a
+              @click.prevent="setCollection('Rendiciones')">Rendiciones</a>
+            </li>
+            <li :class="collection === 'Comprobantes' ? 'is-active' : ''"><a
+              @click.prevent="setCollection('Comprobantes')">Comprobantes</a></li>
+            <li :class="collection === 'Detalles de comprobante' ? 'is-active' : ''"><a
+              @click.prevent="setCollection('Detalles de comprobante')">Detalles de comprobante</a></li>
+          </ul>
         </div>
-      </div>
-      <p class="mb-5">Resultados: <span x-text="total"></span></p>
-      <!-- Table to display institution data -->
-      <div class="table-container">
-        <table class="table is-fullwidth is-hoverable">
-          <thead>
-          <tr>
-            <template x-for="header in getHeaders()">
-              <th x-text="header"></th>
-            </template>
-          </tr>
-          </thead>
-          <tbody x-show="!loading">
-          <template x-for="row in mapCollection()" :key="row[0]">
+        <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
+          <h3 class="has-text-weight-semibold is-size-5" x-text="collection"></h3>
+          <div class="is-flex is-gap-1 is-align-items-center">
+            <p class="has-text-weight-semibold">Descargar:</p>
+            <a :href="getExportUrl('csv')" target="_blank" class="button is-small">CSV</a>
+            <a class="button is-small" :href="getExportUrl('json')" target="_blank">JSON</a>
+          </div>
+        </div>
+        <p class="my-4">Resultados: <span x-text="total"></span></p>
+        <button class="is-link mb-5" @click="toggleModal()">
+          <i class="fa-solid fa-book-open"></i>
+          Ver Diccionario
+        </button>
+
+        <!-- Table to display institution data -->
+        <div class="table-container">
+          <table class="table is-fullwidth is-hoverable">
+            <thead>
             <tr>
-              <template x-for="item in row">
-                <td x-text="item"></td>
+              <template x-for="header in getHeaders()">
+                <th x-text="header"></th>
               </template>
             </tr>
-          </template>
-          </tbody>
-        </table>
-      </div>
-      <div x-show="loading" class="container mt-5 has-text-centered">
-        <span class="loader"></span>
-      </div>
+            </thead>
+            <tbody x-show="!loading">
+            <template x-for="row in mapCollection()" :key="row[0]">
+              <tr>
+                <template x-for="item in row">
+                  <td x-text="item"></td>
+                </template>
+              </tr>
+            </template>
+            </tbody>
+          </table>
+        </div>
+        <div x-show="loading" class="container mt-5 has-text-centered">
+          <span class="loader"></span>
+        </div>
 
 
-      <!-- Pagination Buttons -->
-      <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-        <button class="button" :disabled="!previous" @click="fetchData(previous)">Anterior</button>
-        <button class="button" :disabled="!next" @click="fetchData(next)">Siguiente</button>
-      </nav>
+        <!-- Pagination Buttons -->
+        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+          <button class="button" :disabled="!previous" @click="fetchData(previous)">Anterior</button>
+          <button class="button" :disabled="!next" @click="fetchData(next)">Siguiente</button>
+        </nav>
+      </div>
+    </section>
+
+    <div class="modal" :class="showModal ? 'is-active' : ''">
+      <div class="modal-background" @click="toggleModal()"></div>
+      <div class="modal-content" style="width: 80%;">
+        <div class="box">
+          <h4 class="title is-size-4">Diccionario de datos</h4>
+          <table class="table is-fullwidth">
+            <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Tipo</th>
+              <th>Ejemplo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="field of getColumnNames()" :key="field.name">
+              <tr>
+                <td x-text="field.name"></td>
+                <td x-text="field.description"></td>
+                <td x-text="field.type"></td>
+                <td x-text="field.example"></td>
+              </tr>
+            </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <button class="modal-close is-large" @click="toggleModal()"></button>
     </div>
-  </section>
+  </div>
 {% endblock %}
 
 {% block scripts %}

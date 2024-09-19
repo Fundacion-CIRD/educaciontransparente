@@ -11,15 +11,21 @@
 {#{% endblock %}#}
 
 {% block body %}
-  <section class="section">
-    <div class="container">
-      <h2 class="title">Recursos</h2>
-      <div class="subtitle my-5">
-        <p>La sección "Recursos" ofrece una selección de materiales útiles sobre el Fondo de Gratuidad del Ministerio de
+  <div class="is-background-primary">
+    <div class="container py-5">
+      <h2 class="title is-color-white">Recursos</h2>
+      <div class="my-5">
+        <p class="is-color-white">La sección "Recursos" ofrece una selección de materiales útiles sobre el Fondo de
+          Gratuidad del Ministerio
+          de
           Educación y Ciencias (MEC) de Paraguay. Aquí encontrarás guías, documentos oficiales y herramientas que te
           ayudarán a entender el fondo, asegurando que los estudiantes elegibles puedan aprovechar las oportunidades
           educativas de manera eficiente y sin complicaciones.</p>
       </div>
+    </div>
+  </div>
+  <section class="section">
+    <div class="container">
       <div class="columns is-multiline">
         {% for resource in resources %}
           <div class="column is-one-third">

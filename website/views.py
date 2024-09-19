@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView, TemplateView
 
-from accountability.models import Report, Disbursement, Receipt
+from accountability.models import Report, Disbursement, Receipt, ReceiptItem
 from core.models import Department, Institution, Resource
 from core.serializers import InstitutionSerializer
 
@@ -123,12 +123,19 @@ class ReportDetailView(TemplateView):
         return context
 
 
+def get_report_total(report):
+    return report.receipts.aggregate(
+        total=Sum("receipt_total", output_field=IntegerField())
+    )["total"]
+
+
 CSV_SETTINGS = {
     "institutions": {
         "queryset": Institution.objects.filter(disbursements__isnull=False).distinct(),
         "filename": "instituciones.csv",
         "headers": [
             "id",
+            "codigo_mec_establecimiento",
             "codigo_mec",
             "nombre",
             "tipo",
@@ -144,6 +151,7 @@ CSV_SETTINGS = {
         ],
         "extractor": lambda institution: [
             institution.id,
+            institution.establishment.code,
             institution.code,
             institution.name,
             institution.institution_type,
@@ -167,13 +175,15 @@ CSV_SETTINGS = {
             "id_institucion",
             "nombre_institucion",
             "fecha_desembolso",
-            "monto_desembolso",
+            "monto_resolucion",
+            "monto_desembolsado",
             "origen_fondo",
             "marco",
             "fecha_a_rendir",
             "nombre_director",
             "ci_director",
             "tipo_pago",
+            "observaciones",
         ],
         "extractor": lambda disbursement: [
             disbursement.id,
@@ -181,13 +191,15 @@ CSV_SETTINGS = {
             disbursement.institution_id,
             disbursement.institution.name,
             disbursement.disbursement_date,
+            disbursement.resolution_amount,
             disbursement.amount_disbursed,
-            disbursement.funds_origin,
-            disbursement.origin_details,
+            disbursement.funds_origin.code,
+            disbursement.origin_details.name,
             disbursement.due_date,
             disbursement.principal_name,
             disbursement.principal_issued_id,
-            disbursement.payment_type,
+            disbursement.payment_type.name if disbursement.payment_type else "",
+            disbursement.comments,
         ],
     },
     "reports": {
@@ -198,15 +210,18 @@ CSV_SETTINGS = {
             "id_desembolso",
             "id_institucion",
             "nombre_institucion",
-            "estado",
+            "fecha_rendicion",
+            "monto_rendido",
             "recepcion",
+            "observaciones",
         ],
         "extractor": lambda report: [
             report.id,
             report.disbursement.id,
             report.disbursement.institution.id,
             report.disbursement.institution.name,
-            report.status.value,
+            report.report_date,
+            get_report_total(report),
             report.delivered_via,
         ],
     },
@@ -215,23 +230,47 @@ CSV_SETTINGS = {
         "filename": "comprobantes.csv",
         "headers": [
             "id",
+            "id_institucion",
+            "id_desembolso",
             "id_rendicion",
             "tipo_comprobante",
             "nro_comprobante",
             "fecha_comprobante",
-            "objeto_gasto",
-            "conceptos",
+            "ruc_proveedor",
+            "nombre_proveedor",
             "total",
         ],
         "extractor": lambda receipt: [
             receipt.id,
+            receipt.institution_id,
+            receipt.disbursement.id,
             receipt.report_id,
             receipt.receipt_type.name,
             receipt.receipt_number,
             receipt.receipt_date,
-            receipt.object_of_expenditure,
-            receipt.description,
-            receipt.total,
+            receipt.provider.ruc,
+            receipt.provider.name,
+            receipt.receipt_total,
+        ],
+    },
+    "receipt-items": {
+        "queryset": ReceiptItem.objects.all(),
+        "filename": "detalles_de_comprobante.csv",
+        "headers": [
+            "id",
+            "id_comprobante",
+            "objeto_gasto",
+            "cantidad",
+            "concepto",
+            "precio_unitario",
+        ],
+        "extractor": lambda receipt_item: [
+            receipt_item.id,
+            receipt_item.receipt_id,
+            f"{receipt_item.object_of_expenditure.key}: {receipt_item.object_of_expenditure.value}",
+            receipt_item.quantity,
+            receipt_item.description,
+            receipt_item.unit_price,
         ],
     },
 }
@@ -255,10 +294,10 @@ def add_json_data(collection):
 
 def export_to_csv(request):
     collection = request.GET.get("collection")
-    format = request.GET.get("format")
+    _format = request.GET.get("format")
     if not collection:
         return HttpResponse("No collection selected")
-    if format == "csv":
+    if _format == "csv":
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = (
             f'attachment; filename="{CSV_SETTINGS[collection]["filename"]}"'

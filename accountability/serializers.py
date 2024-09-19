@@ -69,6 +69,7 @@ class DisbursementSerializer(serializers.ModelSerializer):
             "payment_type",
             "institution_id",
             "institution_name",
+            "comments",
         )
 
 
@@ -85,10 +86,12 @@ class ReportSerializer(serializers.ModelSerializer):
             "institution_id",
             "disbursement",
             "status",
+            "report_date",
             "reported_amount",
             "balance",
             "delivered_via",
             "comments",
+            "institution_id",
         )
 
     @staticmethod
@@ -129,6 +132,8 @@ class ReceiptItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReceiptItem
         fields = (
+            "id",
+            "receipt_id",
             "quantity",
             "description",
             "unit_price",
@@ -146,6 +151,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
     receipt_type = ReceiptTypeSerializer(read_only=True)
     items = ReceiptItemSerializer(many=True, read_only=True)
     provider = ProviderSerializer(read_only=True)
+    receipt_total = serializers.SerializerMethodField()
 
     class Meta:
         model = Receipt
@@ -158,8 +164,12 @@ class ReceiptSerializer(serializers.ModelSerializer):
             "provider",
             "institution_id",
             "disbursement_id",
+            "receipt_total",
             "items",
         )
+
+    def get_receipt_total(self, obj):
+        return obj.receipt_total
 
 
 class AccountObjectChartSerializer(serializers.ModelSerializer):
