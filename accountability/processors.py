@@ -65,6 +65,7 @@ class ExcelProcessor:
     def get_institution(self, row):
         code = row[1].value
         establishment_code = row[0].value
+        name = row[3].value.strip()
         if not code or not establishment_code:
             return self.institution
         if self.institution and (
@@ -74,7 +75,7 @@ class ExcelProcessor:
             return self.institution
         try:
             self.institution = Institution.objects.get(
-                code=code, establishment__code=establishment_code
+                code=code, establishment__code=establishment_code, name=name
             )
             return self.institution
         except Institution.DoesNotExist:
@@ -90,7 +91,7 @@ class ExcelProcessor:
             except Institution.DoesNotExist:
                 pass
             logger.info(
-                f"Institution with code {row[1].value}, establishment code {row[0].value} returned more than one object"
+                f"Institution with name={name}, code {row[1].value}, establishment code {row[0].value} does not exist"
             )
             return None
 

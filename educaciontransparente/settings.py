@@ -157,6 +157,12 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "app_log.log",
+            "formatter": "verbose",
+        },
         # "console_debug": {
         #     "level": "DEBUG",
         #     "filters": ["require_debug_true"],
@@ -172,6 +178,7 @@ LOGGING = {
             "handlers": ["console"],
             "level": getenv("LOG_LEVEL", "INFO"),
         },
+        "accountability.processors": {"handlers": ["file"], "level": "INFO"},
     },
 }
 

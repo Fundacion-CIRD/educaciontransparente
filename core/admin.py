@@ -63,7 +63,12 @@ class InstitutionAdmin(ModelAdmin):
         "institution_type",
         "establishment__district__department",
     )
-    search_fields = ("name", "establishment__district__name")
+    search_fields = (
+        "name",
+        "code",
+        "establishment__code",
+        "establishment__district__name",
+    )
     ordering = ("name",)
     autocomplete_fields = ("establishment",)
     fieldsets = [

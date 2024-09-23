@@ -17,10 +17,10 @@ from accountability.models import (
 
 
 def add_view_permissions(user, *models):
-    content_type = ContentType.objects.get_for_models(models)
+    content_types = ContentType.objects.get_for_models(*models).values()
     permissions = Permission.objects.filter(
         codename__startswith="view",
-        content_type__in=content_type,
+        content_type__in=content_types,
     )
     user.user_permissions.add(*permissions)
 
