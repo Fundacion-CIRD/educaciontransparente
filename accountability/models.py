@@ -183,8 +183,12 @@ class Report(models.Model):
             disbursement = self.disbursement.disbursement_date.strftime("%d/%m/%Y")
             due_date = self.disbursement.due_date.strftime("%d/%m/%Y")
         except Exception:
-            return f"Rendición {self.id} - Des {self.disbursement_id}"
-        return f"Rend. s/ des. {disbursement} (venc. {due_date})"
+            return (
+                f"{self.institution.name}: Rend {self.id} - Des {self.disbursement_id}"
+            )
+        return (
+            f"{self.institution.name}: Rend. s/ des. {disbursement} (venc. {due_date})"
+        )
 
     def save(self, *args, **kwargs):
         self.institution = self.disbursement.institution
@@ -337,7 +341,9 @@ class ReceiptItem(models.Model):
         related_name="receipt_items",
         null=True,
     )
-    description = models.CharField(max_length=500, verbose_name="concepto")
+    description = models.CharField(
+        max_length=500, verbose_name="concepto", default="", blank=True
+    )
     unit_price = models.IntegerField(verbose_name="precio unitario")
     quantity = models.FloatField(verbose_name="cantidad", default=1)
 
@@ -349,3 +355,8 @@ class ReceiptItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} {self.description}: {self.unit_price * self.quantity}"
+
+    def save(self, *args, **kwargs):
+        if not self.description:
+            self.description = self.object_of_expenditure.value
+        super().save(*args, **kwargs)
