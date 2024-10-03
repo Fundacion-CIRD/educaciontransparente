@@ -276,7 +276,11 @@ class Receipt(models.Model):
         verbose_name="número de comprobante", max_length=30
     )
     provider = models.ForeignKey(
-        Provider, on_delete=models.PROTECT, verbose_name="proveedor", null=True
+        Provider,
+        on_delete=models.PROTECT,
+        verbose_name="proveedor",
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -289,6 +293,7 @@ class Receipt(models.Model):
         null=True,
         editable=False,
         verbose_name="institución",
+        related_name="receipts",
     )
     disbursement = models.ForeignKey(
         Disbursement,

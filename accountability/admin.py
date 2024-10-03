@@ -5,7 +5,8 @@ from django.contrib.admin import (
 )
 from django.db.models import Sum, ExpressionWrapper, F, IntegerField
 from django.utils.numberformat import format as format_number
-from unfold.admin import ModelAdmin, StackedInline, TabularInline
+from unfold.admin import ModelAdmin, StackedInline
+from unfold.contrib.filters.admin import RangeDateFilter
 
 from accountability.models import (
     Disbursement,
@@ -128,7 +129,12 @@ class ReceiptAdmin(ModelAdmin):
         "report",
     )
     inlines = [ReceiptItemInline]
-    search_fields = ("report__disbursement__institution__name",)
+    search_fields = (
+        "report__disbursement__institution__name",
+        "receipt_number",
+        "receipt_total",
+    )
+    list_filter = [("receipt_date", RangeDateFilter)]
     autocomplete_fields = ("receipt_type", "report", "provider")
     compressed_fields = True
     fieldsets = [

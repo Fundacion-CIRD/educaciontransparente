@@ -3,6 +3,7 @@ from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 from django_filters import rest_framework as filters
 
+from accountability.models import Receipt, Disbursement
 from core.models import Institution, Department, District
 from core.serializers import (
     InstitutionSerializer,
@@ -33,22 +34,18 @@ class InstitutionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_totals(self):
         qs = self.filter_queryset(self.get_queryset())
-        qs = qs.annotate(
-            total_reported=Coalesce(
-                Sum(
-                    ExpressionWrapper(
-                        F("disbursements__reports__receipts__items__unit_price")
-                        * F("disbursements__reports__receipts__items__quantity"),
-                        output_field=IntegerField(),
-                    )
-                ),
-                Value(0, output_field=IntegerField()),
-            )
-        )
-        return qs.aggregate(
-            disbursed=Sum("disbursements__amount_disbursed"),
-            reported=Sum("total_reported"),
-        )
+        receipts = Receipt.objects.filter(institution__in=qs).distinct()
+        disbursements = Disbursement.objects.filter(institution__in=qs).distinct()
+        total_reported = receipts.aggregate(total_reported=Sum("receipt_total"))[
+            "total_reported"
+        ]
+        total_disbursed = disbursements.aggregate(
+            total_disbursed=Sum("amount_disbursed")
+        )["total_disbursed"]
+        return {
+            "disbursed": total_disbursed,
+            "reported": total_reported,
+        }
 
 
 class DepartmentViewSet(viewsets.ReadOnlyModelViewSet):

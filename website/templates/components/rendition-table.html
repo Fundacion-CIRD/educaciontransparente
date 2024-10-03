@@ -27,10 +27,15 @@
             </td>
             <td>{{ receipt.receipt_type.name }}</td>
             <td>{{ receipt.receipt_number }}</td>
-            <td>{{ receipt.provider.name }}</td>
-            <td>{{ receipt.provider.ruc }}</td>
+            {% if receipt.provider %}
+              <td>{{ receipt.provider.name }}</td>
+              <td>{{ receipt.provider.ruc }}</td>
+            {% else %}
+              <td>Sin datos</td>
+              <td>Sin datos</td>
+            {% endif %}
             <td>{{ receipt.receipt_date|date:"d/m/Y" }}</td>
-            <td class="has-text-right">Gs. {{ receipt.total|format_number }}</td>
+            <td class="has-text-right">Gs.&nbsp;{{ receipt.receipt_total|format_number }}</td>
             <td class="has-text-centered">
               {% if receipt.document %}
                 <a href="{{ receipt.document.url }}" target="_blank">Ver</a>
