@@ -228,7 +228,7 @@ UNFOLD = {
                     },
                     {
                         "title": "Proveedores",
-                        "icon": "receipt",
+                        "icon": "store",
                         "link": reverse_lazy(
                             "admin:accountability_provider_changelist"
                         ),

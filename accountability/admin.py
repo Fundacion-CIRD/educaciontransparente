@@ -44,8 +44,16 @@ class DisbursementAdmin(ModelAdmin):
         "disbursement_date",
         "due_date",
     )
-    list_filter = ("disbursement_date",)
-    search_fields = ("institution__name",)
+    list_filter = (
+        ("disbursement_date", RangeDateFilter),
+        ("due_date", RangeDateFilter),
+    )
+    search_fields = (
+        "institution__name",
+        "resolution__full_document_number",
+        "resolution_amount",
+        "amount_disbursed",
+    )
     autocomplete_fields = ("institution", "resolution", "origin_details")
     inlines = [DocumentInline]
     fieldsets = [

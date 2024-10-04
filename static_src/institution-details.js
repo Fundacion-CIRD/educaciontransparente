@@ -57,11 +57,27 @@ function getYearlyReportChartData(yearlyReport) {
   }];
 }
 
-function barChartFormatter(params, newline = false) {
-  if (newline) {
-    return `${params.name}\nGs. ${params.value.toLocaleString()}`;
+function barchartFormatter(element, newline = true) {
+  return `${element.name}${
+    newline ? '\n' : ': '
+  }Gs. ${element.value.toLocaleString()}`;
+}
+
+function parseChartElement(element) {
+  if (!element.children) {
+    return {
+      name: element.value,
+      value: element.totalExpenditure,
+    };
   }
-  return `${params.name}: Gs. ${params.value.toLocaleString()}`;
+  return {
+    name: element.value,
+    children: element.children.map(parseChartElement),
+  };
+}
+
+function parseChartData(response) {
+  return response.results.map(parseChartElement);
 }
 
 function formatNumber(number) {
@@ -72,78 +88,24 @@ function formatNumber(number) {
   }
 }
 
-function mapToTreemapData(node) {
-  // Base case: If it's a leaf node, return its value and name
-  if (!node.children) {
-    return {
-      name: node.value,
-      value: node.totalExpenditure || 0
-    };
-  }
-
-  // Recursive case: Map its children
-  return {
-    name: node.value,
-    children: node.children.map(mapToTreemapData)
-  };
-}
-
 function parseTreemapOption(treeData) {
+  const data = parseChartData(treeData);
   return {
     tooltip: {
-      formatter: function (params) {
-        return barChartFormatter(params);
-      },
+      formatter: barchartFormatter,
     },
-    breadcrumb: {
-      show: false  // Disable the breadcrumb
-    },
-    series: [{
-      type: 'treemap',
-      label: {
-        show: true,
-        formatter: function (params) {
-          return barChartFormatter(params, true);
+    series: [
+      {
+        type: 'treemap',
+        label: {
+          show: true,
+          fontSize: 14,
+          position: 'insideTopLeft',
+          formatter: (params) => barchartFormatter(params, true),
         },
-        fontSize: 14,
-        position: 'insideTopLeft',
+        data,
       },
-      levels: [
-        {
-          itemStyle: {
-            borderColor: '#777',
-            borderWidth: 0,
-            gapWidth: 2
-          }
-        },
-        {
-          itemStyle: {
-            borderColor: '#555',
-            borderWidth: 0,
-            gapWidth: 1
-          }
-        },
-        {
-          itemStyle: {
-            borderColor: '#333',
-            borderWidth: 0,
-            gapWidth: 1
-          }
-        }
-      ],
-      upperLabel: {
-        show: true,
-        height: 30,
-        color: '#fff',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        fontSize: 16,
-        formatter: '{b}',
-      },
-      itemStyle: {
-        borderColor: '#fff'
-      },
-      data: treeData
-    }]
+    ],
   };
 }
 
@@ -190,8 +152,7 @@ async function generateTreemapOption(institutionId, year) {
   if (year) params.append('year', year);
   const response = await fetch(`/api/account-objects/?${params.toString()}`);
   const data = await response.json();
-  const treeData = data.results.map(mapToTreemapData);
-  return parseTreemapOption(treeData);
+  return parseTreemapOption(data);
 }
 
 async function fetchResults(institutionId, year) {

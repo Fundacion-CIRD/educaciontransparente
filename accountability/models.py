@@ -21,6 +21,7 @@ class Resolution(models.Model):
         null=True,
         blank=True,
     )
+    full_document_number = models.CharField(max_length=256, editable=False)
 
     class Meta:
         verbose_name = "resolución"
@@ -28,6 +29,10 @@ class Resolution(models.Model):
 
     def __str__(self):
         return f"{self.document_number or ''}/{self.document_year or ''}"
+
+    def save(self, *args, **kwargs):
+        self.full_document_number = f"{self.document_number}/{self.document_year}"
+        super().save(*args, **kwargs)
 
 
 class DisbursementOrigin(models.Model):
