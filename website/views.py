@@ -2,14 +2,22 @@ import csv
 import json
 
 from django.db.models import Sum, Q, ExpressionWrapper, F, IntegerField, Value
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, ExtractYear
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView, TemplateView
 
-from accountability.models import Report, Disbursement, Receipt, ReceiptItem
-from core.models import Department, Institution, Resource
+from accountability.models import (
+    Report,
+    Disbursement,
+    Receipt,
+    ReceiptItem,
+    DisbursementOrigin,
+    ReceiptType,
+    AccountObject,
+)
+from core.models import Department, Institution, Resource, District
 from core.serializers import InstitutionSerializer
 
 
@@ -37,6 +45,50 @@ def quienes_somos(request):
 
 def open_data(request):
     return render(request, "website/open-data.html")
+
+
+def institutions_open_data(request):
+    institution_types = (
+        Institution.objects.values_list("institution_type", flat=True)
+        .distinct()
+        .order_by("institution_type")
+    )
+    context = {
+        "departments": Department.objects.order_by("name"),
+        "institution_types": institution_types,
+    }
+    return render(request, "website/open-data/institutions.html", context)
+
+
+def disbursements_open_data(request):
+    context = {
+        "disbursement_origins": DisbursementOrigin.objects.order_by("code"),
+    }
+    return render(request, "website/open-data/disbursements.html", context)
+
+
+def reports_open_data(request):
+    return render(request, "website/open-data/reports.html")
+
+
+def receipts_open_data(request):
+    return render(
+        request,
+        "website/open-data/receipts.html",
+        {"receipt_types": ReceiptType.objects.all()},
+    )
+
+
+def receipt_items_open_data(request):
+    return render(
+        request,
+        "website/open-data/receipt-items.html",
+        {
+            "account_objects": AccountObject.objects.filter(receipt_items__isnull=False)
+            .order_by("key")
+            .distinct()
+        },
+    )
 
 
 def resources(request):
@@ -102,11 +154,17 @@ class InstitutionDetailsView(DetailView):
         context = super().get_context_data(**kwargs)
         disbursed_qs = Disbursement.objects.filter(institution=context["object"])
         reported_qs = Report.objects.filter(disbursement__institution=context["object"])
+        years = (
+            disbursed_qs.filter(disbursement_date__isnull=False)
+            .annotate(year=ExtractYear("disbursement_date"))
+            .values_list("year", flat=True)
+            .distinct()
+            .order_by("-year")
+        )
         context["totals"] = get_totals(disbursed_qs, reported_qs)
         yearly_report = get_yearly_report(disbursed_qs, reported_qs)
         context["yearly_report"] = json.dumps(yearly_report, default=str)
-        context["years"] = yearly_report.keys()
-        print(context["years"])
+        context["years"] = years
         return context
 
 
@@ -117,6 +175,7 @@ class ReportDetailView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["object"] = get_object_or_404(Institution, pk=kwargs["institution_id"])
         context["report"] = get_object_or_404(Report, pk=kwargs.get("report_id"))
+        context["receipts"] = context["report"].receipts.order_by("-receipt_date")
         reported_qs = Report.objects.filter(id=context["report"].id)
         disbursement_qs = Disbursement.objects.filter(reports__in=reported_qs)
         context["totals"] = get_totals(disbursement_qs, reported_qs)

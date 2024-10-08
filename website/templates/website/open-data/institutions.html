@@ -11,20 +11,7 @@
     <section class="section">
       <div class="container">
         <div class="tabs">
-          <ul>
-            <li :class="collection === 'Instituciones' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Instituciones')">Instituciones</a></li>
-            <li :class="collection === 'Desembolsos' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Desembolsos')">Desembolsos</a>
-            </li>
-            <li :class="collection === 'Rendiciones' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Rendiciones')">Rendiciones</a>
-            </li>
-            <li :class="collection === 'Comprobantes' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Comprobantes')">Comprobantes</a></li>
-            <li :class="collection === 'Detalles de comprobante' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Detalles de comprobante')">Detalles de comprobante</a></li>
-          </ul>
+          {% include 'website/open-data/tabs.html' %}
         </div>
         <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
           <h3 class="has-text-weight-semibold is-size-5" x-text="collection"></h3>
@@ -48,7 +35,9 @@
             <div class="field">
               <label class="label">Nombre de institución</label>
               <div class="control">
-                <input class="input" type="text" placeholder="Colegio nacional...">
+                <input class="input" type="text" placeholder="Colegio nacional..."
+                       x-model="queries.institution"
+                       @input="debouncedFetchFilterList('institutions')">
               </div>
             </div>
           </div>
@@ -59,10 +48,12 @@
               <label class="label">Departamento</label>
               <div class="control">
                 <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un departamento</option>
-                    <option value="1">Departamento 1</option>
-                    <option value="2">Departamento 2</option>
+                  <select @change="selectDepartment($event)">
+                    <option value="">Cualquiera</option>
+                    {% for department in departments %}
+                      <option value="{{ department.id }}">{{ department.name }}</option>
+                    {% endfor %}
+
                   </select>
                 </div>
               </div>
@@ -74,12 +65,40 @@
             <div class="field">
               <label class="label">Distrito</label>
               <div class="control">
-                <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un distrito</option>
-                    <option value="1">Distrito 1</option>
-                    <option value="2">Distrito 2</option>
-                  </select>
+                <input
+                  id="districtInput"
+                  class="input"
+                  type="text"
+                  placeholder="Escriba un nombre..."
+                  x-model="queries.district"
+                  @input="debouncedFetchFilterList('districts')"
+                  @click.away="open.districts = false"
+                >
+              </div>
+              <div class="dropdown" x-show="open.districts"
+                   :class="{ 'is-active': open.districts }">
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div class="dropdown-content">
+                    <a
+                      href="#"
+                      class="dropdown-item"
+                      :class="{ 'is-active': filterResults.districts.length === 0 }"
+                      x-show="filterResults.districts.length === 0"
+                      disabled
+                    >
+                      <span>No hay resultados</span>
+                    </a>
+                    <template x-for="(result, i) in filterResults.districts" :key="i">
+                      <a
+                        href="#"
+                        class="dropdown-item"
+                        :class="{ 'is-active': i === selectedIndex.districts }"
+                        @click.prevent="selectDistrict(result)"
+                      >
+                        <span x-text="result.name"></span>
+                      </a>
+                    </template>
+                  </div>
                 </div>
               </div>
             </div>
@@ -88,13 +107,14 @@
           <!-- Tipo select -->
           <div class="column is-one-quarter">
             <div class="field">
-              <label class="label">Tipo</label>
+              <label class="label">Tipo de institución</label>
               <div class="control">
                 <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un tipo</option>
-                    <option value="1">Tipo 1</option>
-                    <option value="2">Tipo 2</option>
+                  <select @change="selectInstitutionType($event)">
+                    <option selected value="">Cualquiera</option>
+                    {% for institution_type in institution_types %}
+                      <option value="{{ institution_type }}">{{ institution_type }}</option>
+                    {% endfor %}
                   </select>
                 </div>
               </div>

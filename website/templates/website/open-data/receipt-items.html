@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-  <div x-data="resourcesData()" x-init="fetchData()">
+  <div x-data="resourcesData()">
     <div class="is-background-primary">
       <div class="container py-5">
         <h2 class="title is-color-white">Datos abiertos</h2>
@@ -11,20 +11,7 @@
     <section class="section">
       <div class="container">
         <div class="tabs">
-          <ul>
-            <li :class="collection === 'Instituciones' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Instituciones')">Instituciones</a></li>
-            <li :class="collection === 'Desembolsos' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Desembolsos')">Desembolsos</a>
-            </li>
-            <li :class="collection === 'Rendiciones' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Rendiciones')">Rendiciones</a>
-            </li>
-            <li :class="collection === 'Comprobantes' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Comprobantes')">Comprobantes</a></li>
-            <li :class="collection === 'Detalles de comprobante' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Detalles de comprobante')">Detalles de comprobante</a></li>
-          </ul>
+          {% include 'website/open-data/tabs.html' %}
         </div>
         <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
           <h3 class="has-text-weight-semibold is-size-5" x-text="collection"></h3>
@@ -42,64 +29,38 @@
 
 
         <!-- Filters -->
-        <div class="columns is-vcentered">
+        <div class="columns is-vcentered is-multiline">
+
           <!-- Buscar input -->
-          <div class="column is-one-quarter">
+          <div class="column is-one-fifth">
             <div class="field">
-              <label class="label">Nombre de institución</label>
+              <label class="label">ID Comprobante</label>
               <div class="control">
-                <input class="input" type="text" placeholder="Colegio nacional...">
+                <input class="input" type="text" placeholder="143/2020"
+                       x-model="queries.receiptId"
+                       @input="debouncedFetchFilterList('receipt')">
               </div>
             </div>
           </div>
 
-          <!-- Departamento select -->
-          <div class="column is-one-quarter">
+          <!-- Tipo de comprobante select -->
+          <div class="column is-one-fifth">
             <div class="field">
-              <label class="label">Departamento</label>
+              <label class="label">Objeto de gasto</label>
               <div class="control">
                 <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un departamento</option>
-                    <option value="1">Departamento 1</option>
-                    <option value="2">Departamento 2</option>
+                  <select @change="selectAccountObject($event)">
+                    <option value="">Cualquiera</option>
+                    {% for obj in account_objects %}
+                      <option value="{{ obj.id }}">{{ obj.key }}: {{ obj.value }}</option>
+                    {% endfor %}
+
                   </select>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Distrito select -->
-          <div class="column is-one-quarter">
-            <div class="field">
-              <label class="label">Distrito</label>
-              <div class="control">
-                <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un distrito</option>
-                    <option value="1">Distrito 1</option>
-                    <option value="2">Distrito 2</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tipo select -->
-          <div class="column is-one-quarter">
-            <div class="field">
-              <label class="label">Tipo</label>
-              <div class="control">
-                <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un tipo</option>
-                    <option value="1">Tipo 1</option>
-                    <option value="2">Tipo 2</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Table to display institution data -->

@@ -1,0 +1,17 @@
+<ul>
+  <li :class="collection === 'Instituciones' ? 'is-active' : ''">
+    <a href="{% url 'institutions_open_data' %}">Instituciones</a>
+  </li>
+  <li :class="collection === 'Desembolsos' ? 'is-active' : ''">
+    <a href="{% url 'disbursements_open_data' %}">Desembolsos</a>
+  </li>
+  <li :class="collection === 'Rendiciones' ? 'is-active' : ''">
+    <a href="{% url 'reports_open_data' %}">Rendiciones</a>
+  </li>
+  <li :class="collection === 'Comprobantes' ? 'is-active' : ''">
+    <a href="{% url 'receipts_open_data' %}">Comprobantes</a>
+  </li>
+  <li :class="collection === 'Detalles de comprobante' ? 'is-active' : ''">
+    <a href="{% url 'receipt_items_open_data' %}">Detalles de comprobante</a>
+  </li>
+</ul>

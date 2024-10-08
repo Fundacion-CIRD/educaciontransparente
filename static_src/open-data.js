@@ -52,6 +52,7 @@ const columnNames = {
   'Comprobantes': [
     'ID',
     'ID institución',
+    'Nombre institución',
     'ID desembolso',
     'ID rendición',
     'Tipo comprobante',
@@ -406,6 +407,70 @@ function resourcesData() {
     showModal: false,
     collection: 'Instituciones',
     total: 0,
+    timeout: null,
+    open: {
+      districts: false,
+      resolutions: false,
+    },
+    queries: {
+      institution: '',
+      district: '',
+      department: '',
+      institutionType: '',
+      resolution: '',
+      disbursementId: '',
+      reportId: '',
+      receiptId: '',
+    },
+    selectedFilters: {
+      institution: null,
+      district: null,
+      department: null,
+      institutionType: null,
+      disbursementOrigin: null,
+      disbursementBefore: null,
+      disbursementAfter: null,
+      reportDateBefore: null,
+      reportDateAfter: null,
+      receiptDateBefore: null,
+      receiptDateAfter: null,
+      resolution: null,
+      receiptType: null,
+      objectOfExpenditure: null,
+    },
+    selectedDistrict: null,
+    selectedDepartment: null,
+    selectedInstitutionType: null,
+    filterResults: {
+      districts: [],
+      resolutions: [],
+      institutions: [],
+    },
+    selectedIndex: {
+      districts: null,
+    },
+    init() {
+      switch (document.location.pathname.split('/')[2]) {
+        case 'institutions':
+          this.collection = 'Instituciones';
+          break;
+        case 'disbursements':
+          this.collection = 'Desembolsos';
+          break;
+        case 'reports':
+          this.collection = 'Rendiciones';
+          break;
+        case 'receipts':
+          this.collection = 'Comprobantes';
+          break;
+        case 'receipt-items':
+          this.collection = 'Detalles de comprobante';
+          break;
+        default:
+          break;
+      }
+      this.fetchData();
+    },
 
     getColumnNames() {
       return dataDictionary[this.collection]
@@ -415,6 +480,161 @@ function resourcesData() {
       this.showModal = !this.showModal;
     },
 
+    async fetchDistricts() {
+      if (this.queries.district.length < 2) {
+        this.open.districts = false;
+        this.selectedFilters.district = null;
+        this.fetchData();
+        return;
+      }
+      const params = new URLSearchParams()
+      if (this.selectedDepartment) params.append('department', this.selectedDepartment);
+      params.append('search', this.queries.district);
+      const response = await fetch(`/api/districts/?${params.toString()}`)
+      const data = await response.json();
+      this.filterResults.districts = data.results;
+      this.open.districts = true;
+    },
+
+    selectDistrict(item) {
+      this.selectedFilters.district = item;
+      this.queries.district = item.name;
+      this.open.districts = false;
+      this.fetchData();
+    },
+
+    async fetchResolutions() {
+      if (this.queries.resolution.length < 2) {
+        this.open.resolutions = false;
+        this.selectedFilters.resolution = null;
+        this.fetchData();
+        return;
+      }
+      const params = new URLSearchParams()
+      params.append('search', this.queries.resolution);
+      const response = await fetch(`/api/resolutions/?${params.toString()}`)
+      const data = await response.json();
+      this.filterResults.resolutions = data.results;
+      this.open.resolutions = true;
+    },
+
+    selectResolution(item) {
+      this.selectedFilters.resolution = item;
+      this.queries.resolution = item.fullDocumentNumber;
+      this.open.resolutions = false;
+      this.fetchData();
+    },
+
+    async fetchInstitutions() {
+      if (this.queries.institution.length < 2) {
+        this.open.institutions = false;
+        this.selectedFilters.institution = null;
+        this.fetchData();
+        return;
+      }
+      const params = new URLSearchParams()
+      params.append('search', this.queries.institution);
+      const response = await fetch(`/api/institutions/?${params.toString()}`)
+      const data = await response.json();
+      this.filterResults.institutions = data.results;
+      this.open.institutions = true;
+    },
+
+    selectInstitution(item) {
+      this.selectedFilters.institution = item;
+      this.queries.institution = item.name;
+      this.open.institutions = false;
+      this.fetchData();
+    },
+
+    selectDepartment(event) {
+      this.selectedFilters.department = event.target.value;
+      this.fetchData();
+    },
+
+    selectReceiptType(event) {
+      this.selectedFilters.receiptType = event.target.value;
+      this.fetchData();
+    },
+
+    selectDisbursementOrigin(event) {
+      this.selectedFilters.disbursementOrigin = event.target.value;
+      this.fetchData();
+    },
+
+    selectInstitutionType(event) {
+      this.selectedFilters.institutionType = event.target.value;
+      this.fetchData();
+    },
+
+    selectDisbursementBefore(event) {
+      this.selectedFilters.disbursementBefore = event.target.value;
+      this.fetchData();
+    },
+
+    selectDisbursementAfter(event) {
+      this.selectedFilters.disbursementAfter = event.target.value;
+      this.fetchData();
+    },
+
+    selectReportDateBefore(event) {
+      this.selectedFilters.reportDateBefore = event.target.value;
+      this.fetchData();
+    },
+
+    selectReportDateAfter(event) {
+      this.selectedFilters.reportDateAfter = event.target.value;
+      this.fetchData();
+    },
+
+    selectReceiptDateBefore(event) {
+      this.selectedFilters.receiptDateBefore = event.target.value;
+      this.fetchData();
+    },
+
+    selectReceiptDateAfter(event) {
+      this.selectedFilters.receiptDateAfter = event.target.value;
+      this.fetchData();
+    },
+
+    selectAccountObject(event) {
+      this.selectedFilters.objectOfExpenditure = event.target.value;
+      this.fetchData();
+    },
+
+
+    fetchFilterList(_collection) {
+      switch (_collection) {
+        case 'districts':
+          void this.fetchDistricts();
+          return;
+        case 'institutions':
+          if (this.collection === 'Instituciones') {
+            this.fetchData();
+            return;
+          }
+          this.fetchInstitutions();
+          break;
+        case 'resolutions':
+          this.fetchResolutions();
+          break;
+        case 'disbursement':
+          this.fetchData();
+          break;
+        case 'report':
+          this.fetchData();
+          break;
+        case 'receipt':
+          this.fetchData();
+          break;
+      }
+    },
+
+    debouncedFetchFilterList(collection) {
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => this.fetchFilterList(collection), 300);
+    },
+
     fetchData(url = null) {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('collection')) {
@@ -422,7 +642,28 @@ function resourcesData() {
       }
 
       if (!url) {
-        url = endpoints[this.collection];
+
+        const params = new URLSearchParams();
+        params.append('limit', '20');
+        if (this.selectedFilters.district) params.append('district', this.selectedFilters.district.id);
+        if (this.selectedFilters.department) params.append('department', this.selectedFilters.department);
+        if (this.selectedFilters.institutionType) params.append('institution_type', this.selectedFilters.institutionType);
+        if (this.collection === 'Instituciones' && this.queries.institution) params.append('name', this.queries.institution);
+        if (this.selectedFilters.disbursementOrigin) params.append('funds_origin', this.selectedFilters.disbursementOrigin);
+        if (this.selectedFilters.disbursementBefore) params.append('disbursement_date_before', this.selectedFilters.disbursementBefore);
+        if (this.selectedFilters.disbursementAfter) params.append('disbursement_date_after', this.selectedFilters.disbursementAfter);
+        if (this.selectedFilters.reportDateBefore) params.append('report_date_before', this.selectedFilters.reportDateBefore);
+        if (this.selectedFilters.reportDateAfter) params.append('report_date_after', this.selectedFilters.reportDateAfter);
+        if (this.selectedFilters.receiptDateBefore) params.append('receipt_date_before', this.selectedFilters.receiptDateBefore);
+        if (this.selectedFilters.receiptDateAfter) params.append('receipt_date_after', this.selectedFilters.receiptDateAfter);
+        if (this.selectedFilters.resolution) params.append('resolution', this.selectedFilters.resolution.id);
+        if (this.selectedFilters.institution) params.append('institution', this.selectedFilters.institution.id);
+        if (this.queries.disbursementId) params.append('disbursement', this.queries.disbursementId);
+        if (this.queries.reportId) params.append('report', this.queries.reportId);
+        if (this.selectedFilters.receiptType) params.append('receipt_type', this.selectedFilters.receiptType);
+        if (this.queries.receiptId) params.append('receipt', this.queries.receiptId);
+        if (this.selectedFilters.objectOfExpenditure) params.append('object_of_expenditure', this.selectedFilters.objectOfExpenditure);
+        url = endpoints[this.collection] + `?${params.toString()}`;
       }
 
       this.loading = true;
@@ -500,7 +741,8 @@ function resourcesData() {
           case 'Comprobantes':
             return [
               result.id,
-              result.institutionId,
+              result.institution.id,
+              result.institution.name,
               result.disbursementId,
               result.reportId,
               result.receiptType?.name,

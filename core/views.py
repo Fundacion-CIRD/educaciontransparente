@@ -19,6 +19,7 @@ class InstitutionFilter(filters.FilterSet):
     )
     id = filters.NumberFilter(field_name="id")
     institution_type = filters.CharFilter()
+    name = filters.CharFilter(field_name="name", lookup_expr="icontains")
 
 
 class InstitutionViewSet(viewsets.ReadOnlyModelViewSet):

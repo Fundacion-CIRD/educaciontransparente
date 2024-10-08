@@ -6,10 +6,12 @@ from accountability.views import (
     ReceiptViewSet,
     AccountObjectChartViewSet,
     ReceiptItemViewSet,
+    ResolutionViewSet,
 )
 
 router = routers.SimpleRouter()
 
+router.register("resolutions", ResolutionViewSet)
 router.register("disbursements", DisbursementViewSet)
 router.register("reports", ReportViewSet)
 router.register("receipts", ReceiptViewSet)

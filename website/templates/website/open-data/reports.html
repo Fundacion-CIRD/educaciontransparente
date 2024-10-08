@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-  <div x-data="resourcesData()" x-init="fetchData()">
+  <div x-data="resourcesData()">
     <div class="is-background-primary">
       <div class="container py-5">
         <h2 class="title is-color-white">Datos abiertos</h2>
@@ -11,20 +11,7 @@
     <section class="section">
       <div class="container">
         <div class="tabs">
-          <ul>
-            <li :class="collection === 'Instituciones' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Instituciones')">Instituciones</a></li>
-            <li :class="collection === 'Desembolsos' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Desembolsos')">Desembolsos</a>
-            </li>
-            <li :class="collection === 'Rendiciones' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Rendiciones')">Rendiciones</a>
-            </li>
-            <li :class="collection === 'Comprobantes' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Comprobantes')">Comprobantes</a></li>
-            <li :class="collection === 'Detalles de comprobante' ? 'is-active' : ''"><a
-              @click.prevent="setCollection('Detalles de comprobante')">Detalles de comprobante</a></li>
-          </ul>
+          {% include 'website/open-data/tabs.html' %}
         </div>
         <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
           <h3 class="has-text-weight-semibold is-size-5" x-text="collection"></h3>
@@ -42,64 +29,87 @@
 
 
         <!-- Filters -->
-        <div class="columns is-vcentered">
+        <div class="columns is-vcentered is-multiline">
           <!-- Buscar input -->
-          <div class="column is-one-quarter">
+          <div class="column is-one-fifth">
             <div class="field">
               <label class="label">Nombre de institución</label>
               <div class="control">
-                <input class="input" type="text" placeholder="Colegio nacional...">
+                <input class="input" type="text" placeholder="Colegio nacional..."
+                       x-model="queries.institution"
+                       @input="debouncedFetchFilterList('institutions')">
               </div>
-            </div>
-          </div>
-
-          <!-- Departamento select -->
-          <div class="column is-one-quarter">
-            <div class="field">
-              <label class="label">Departamento</label>
-              <div class="control">
-                <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un departamento</option>
-                    <option value="1">Departamento 1</option>
-                    <option value="2">Departamento 2</option>
-                  </select>
+              <div class="dropdown" x-show="open.institutions"
+                   :class="{ 'is-active': open.institutions }">
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div class="dropdown-content">
+                    <a
+                      href="#"
+                      class="dropdown-item"
+                      :class="{ 'is-active': filterResults.institutions.length === 0 }"
+                      x-show="filterResults.institutions.length === 0"
+                      disabled
+                    >
+                      <span>No hay resultados</span>
+                    </a>
+                    <template x-for="(result, i) in filterResults.institutions" :key="i">
+                      <a
+                        href="#"
+                        class="dropdown-item"
+                        :class="{ 'is-active': i === selectedIndex.institutions }"
+                        @click.prevent="selectInstitution(result)"
+                      >
+                        <span x-text="result.name"></span>
+                      </a>
+                    </template>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Distrito select -->
-          <div class="column is-one-quarter">
+          <!-- Buscar input -->
+          <div class="column is-one-fifth">
             <div class="field">
-              <label class="label">Distrito</label>
+              <label class="label">ID Desembolso</label>
               <div class="control">
-                <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un distrito</option>
-                    <option value="1">Distrito 1</option>
-                    <option value="2">Distrito 2</option>
-                  </select>
-                </div>
+                <input class="input" type="text" placeholder="143/2020"
+                       x-model="queries.disbursementId"
+                       @input="debouncedFetchFilterList('disbursement')">
               </div>
             </div>
           </div>
 
-          <!-- Tipo select -->
-          <div class="column is-one-quarter">
+          <!-- Fecha rendicion desde -->
+          <div class="column is-one-fifth">
             <div class="field">
-              <label class="label">Tipo</label>
+              <label class="label">Fecha rendición desde</label>
               <div class="control">
-                <div class="select is-fullwidth">
-                  <select>
-                    <option value="">Selecciona un tipo</option>
-                    <option value="1">Tipo 1</option>
-                    <option value="2">Tipo 2</option>
-                  </select>
-                </div>
+                <input
+                  id="disbursementDateFrom"
+                  class="input"
+                  type="date"
+                  @change="selectReportDateAfter($event)"
+                >
               </div>
             </div>
           </div>
+
+          <!-- Fecha rendicion hasta -->
+          <div class="column is-one-fifth">
+            <div class="field">
+              <label class="label">Fecha rendición hasta</label>
+              <div class="control">
+                <input
+                  id="disbursementDateTo"
+                  class="input"
+                  type="date"
+                  @change="selectReportDateBefore($event)"
+                >
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Table to display institution data -->

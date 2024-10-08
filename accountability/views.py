@@ -12,6 +12,9 @@ from accountability.models import (
     Receipt,
     ReceiptItem,
     AccountObject,
+    Resolution,
+    DisbursementOrigin,
+    ReceiptType,
 )
 from accountability.serializers import (
     ReportSerializer,
@@ -19,8 +22,36 @@ from accountability.serializers import (
     ReceiptSerializer,
     AccountObjectChartSerializer,
     ReceiptItemSerializer,
+    ResolutionSerializer,
+    ReceiptTypeSerializer,
 )
 from core.models import Institution
+
+
+class ResolutionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Resolution.objects.order_by("document_year", "document_number")
+    serializer_class = ResolutionSerializer
+    search_fields = ["full_document_number"]
+
+
+class DisbursementFilter(filters.FilterSet):
+    institution = filters.ModelChoiceFilter(
+        queryset=Institution.objects.filter(reports__isnull=False).distinct(),
+        label="Institución",
+    )
+    resolution = filters.ModelChoiceFilter(
+        queryset=Resolution.objects.all(), label="Resolución"
+    )
+    funds_origin = filters.ModelChoiceFilter(
+        queryset=DisbursementOrigin.objects.all(), label="Origen del fondo"
+    )
+    disbursement_date = filters.DateFromToRangeFilter(field_name="disbursement_date")
+
+
+class DisbursementViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Disbursement.objects.all()
+    serializer_class = DisbursementSerializer
+    filterset_class = DisbursementFilter
 
 
 class ReportFilter(filters.FilterSet):
@@ -32,19 +63,18 @@ class ReportFilter(filters.FilterSet):
     year = filters.NumberFilter(
         field_name="disbursement__disbursement_date__year", label="Año"
     )
+    disbursement = filters.ModelChoiceFilter(
+        queryset=Disbursement.objects.all(),
+    )
+    report_date = filters.DateFromToRangeFilter(field_name="report_date")
 
     class Meta:
         model = Report
         fields = ["institution"]
 
 
-class DisbursementViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Disbursement.objects.all()
-    serializer_class = DisbursementSerializer
-
-
 class ReportViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Report.objects.all()
+    queryset = Report.objects.all().order_by("-disbursement__disbursement_date")
     serializer_class = ReportSerializer
     filterset_class = ReportFilter
 
@@ -78,14 +108,37 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(data=response_data)
 
 
+class ReceiptFilter(filters.FilterSet):
+    institution = filters.ModelChoiceFilter(
+        queryset=Institution.objects.filter(reports__isnull=False).distinct(),
+        label="Institución",
+    )
+    disbursement = filters.ModelChoiceFilter(
+        queryset=Disbursement.objects.all(),
+    )
+    report = filters.ModelChoiceFilter(
+        queryset=Report.objects.all(),
+    )
+    receipt_type = filters.ModelChoiceFilter(
+        queryset=ReceiptType.objects.all(),
+    )
+    receipt_date = filters.DateFromToRangeFilter(field_name="receipt_date")
+
+    class Meta:
+        model = Receipt
+        fields = ["institution", "disbursement", "report", "receipt_date"]
+
+
 class ReceiptViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
+    filterset_class = ReceiptFilter
 
 
 class ReceiptItemViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ReceiptItem.objects.all()
     serializer_class = ReceiptItemSerializer
+    filterset_fields = ["object_of_expenditure", "receipt"]
 
 
 class AccountObjectChartViewSet(viewsets.ReadOnlyModelViewSet):

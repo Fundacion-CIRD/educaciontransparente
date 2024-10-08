@@ -286,6 +286,7 @@ class Receipt(models.Model):
         verbose_name="proveedor",
         null=True,
         blank=True,
+        help_text='Si deja el campo en blanco, se mostrará "Sin datos"',
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -31,7 +31,7 @@
             type="text"
             placeholder="Escriba un nombre..."
             x-model="queries.districts"
-            @input="debouncedFetchResults('districts')"
+            @input="debouncedFetchFilterList('districts')"
             @click.away="open.districts = false"
           >
         </div>
@@ -71,7 +71,7 @@
             type="text"
             placeholder="Escriba un nombre..."
             x-model="queries.institutions"
-            @input="debouncedFetchResults('institutions')"
+            @input="debouncedFetchFilterList('institutions')"
             @click.away="open.institutions = false"
           >
         </div>

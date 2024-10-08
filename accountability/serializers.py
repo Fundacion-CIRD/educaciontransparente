@@ -19,12 +19,19 @@ from accountability.models import (
     OriginDetail,
     PaymentType,
 )
+from core.serializers import InstitutionSerializer
 
 
 class ResolutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resolution
-        fields = ("document_number", "document_year", "document")
+        fields = (
+            "id",
+            "document_number",
+            "document_year",
+            "document",
+            "full_document_number",
+        )
 
 
 class DisbursementOriginSerializer(serializers.ModelSerializer):
@@ -152,6 +159,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
     items = ReceiptItemSerializer(many=True, read_only=True)
     provider = ProviderSerializer(read_only=True)
     receipt_total = serializers.SerializerMethodField()
+    institution = InstitutionSerializer(read_only=True)
 
     class Meta:
         model = Receipt
@@ -162,7 +170,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
             "receipt_date",
             "receipt_number",
             "provider",
-            "institution_id",
+            "institution",
             "disbursement_id",
             "receipt_total",
             "items",
