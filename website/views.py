@@ -8,6 +8,12 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView, TemplateView
 
+from accountability.filters import (
+    DisbursementFilter,
+    ReportFilter,
+    ReceiptFilter,
+    ReceiptItemFilter,
+)
 from accountability.models import (
     Report,
     Disbursement,
@@ -17,6 +23,7 @@ from accountability.models import (
     ReceiptType,
     AccountObject,
 )
+from core.filters import InstitutionFilter
 from core.models import Department, Institution, Resource, District
 from core.serializers import InstitutionSerializer
 
@@ -191,6 +198,7 @@ def get_report_total(report):
 CSV_SETTINGS = {
     "institutions": {
         "queryset": Institution.objects.filter(disbursements__isnull=False).distinct(),
+        "filterset": InstitutionFilter,
         "filename": "instituciones.csv",
         "headers": [
             "id",
@@ -227,6 +235,7 @@ CSV_SETTINGS = {
     },
     "disbursements": {
         "queryset": Disbursement.objects.all(),
+        "filterset": DisbursementFilter,
         "filename": "desembolsos.csv",
         "headers": [
             "id",
@@ -263,6 +272,7 @@ CSV_SETTINGS = {
     },
     "reports": {
         "queryset": Report.objects.all(),
+        "filterset": ReportFilter,
         "filename": "rendiciones.csv",
         "headers": [
             "id",
@@ -286,6 +296,7 @@ CSV_SETTINGS = {
     },
     "receipts": {
         "queryset": Receipt.objects.all(),
+        "filterset": ReceiptFilter,
         "filename": "comprobantes.csv",
         "headers": [
             "id",
@@ -314,6 +325,7 @@ CSV_SETTINGS = {
     },
     "receipt-items": {
         "queryset": ReceiptItem.objects.all(),
+        "filterset": ReceiptItemFilter,
         "filename": "detalles_de_comprobante.csv",
         "headers": [
             "id",
@@ -335,18 +347,22 @@ CSV_SETTINGS = {
 }
 
 
-def add_csv_data(csv_writer, collection):
+def add_csv_data(csv_writer, collection, request):
     collection_settings = CSV_SETTINGS[collection]
+    filterset = collection_settings["filterset"](
+        request.GET, queryset=collection_settings["queryset"]
+    )
     columns = collection_settings["headers"]
     csv_writer.writerow(columns)
-    for item in collection_settings["queryset"]:
+    for item in filterset.qs.all():
         csv_writer.writerow(collection_settings["extractor"](item))
 
 
-def add_json_data(collection):
+def add_json_data(collection, request):
     settings = CSV_SETTINGS[collection]
+    filterset = settings["filterset"](request.GET, queryset=settings["queryset"])
     data = []
-    for item in settings["queryset"]:
+    for item in filterset.qs.all():
         data.append(dict(zip(settings["headers"], settings["extractor"](item))))
     return data
 
@@ -362,7 +378,7 @@ def export_to_csv(request):
             f'attachment; filename="{CSV_SETTINGS[collection]["filename"]}"'
         )
         writer = csv.writer(response)
-        add_csv_data(writer, collection)
+        add_csv_data(writer, collection, request)
     else:
-        response = JsonResponse(add_json_data(collection), safe=False)
+        response = JsonResponse(add_json_data(collection, request), safe=False)
     return response

@@ -635,6 +635,27 @@ function resourcesData() {
       this.timeout = setTimeout(() => this.fetchFilterList(collection), 300);
     },
 
+    setParams(params) {
+      if (this.selectedFilters.district) params.append('district', this.selectedFilters.district.id);
+      if (this.selectedFilters.department) params.append('department', this.selectedFilters.department);
+      if (this.selectedFilters.institutionType) params.append('institution_type', this.selectedFilters.institutionType);
+      if (this.collection === 'Instituciones' && this.queries.institution) params.append('name', this.queries.institution);
+      if (this.selectedFilters.disbursementOrigin) params.append('funds_origin', this.selectedFilters.disbursementOrigin);
+      if (this.selectedFilters.disbursementBefore) params.append('disbursement_date_before', this.selectedFilters.disbursementBefore);
+      if (this.selectedFilters.disbursementAfter) params.append('disbursement_date_after', this.selectedFilters.disbursementAfter);
+      if (this.selectedFilters.reportDateBefore) params.append('report_date_before', this.selectedFilters.reportDateBefore);
+      if (this.selectedFilters.reportDateAfter) params.append('report_date_after', this.selectedFilters.reportDateAfter);
+      if (this.selectedFilters.receiptDateBefore) params.append('receipt_date_before', this.selectedFilters.receiptDateBefore);
+      if (this.selectedFilters.receiptDateAfter) params.append('receipt_date_after', this.selectedFilters.receiptDateAfter);
+      if (this.selectedFilters.resolution) params.append('resolution', this.selectedFilters.resolution.id);
+      if (this.selectedFilters.institution) params.append('institution', this.selectedFilters.institution.id);
+      if (this.queries.disbursementId) params.append('disbursement', this.queries.disbursementId);
+      if (this.queries.reportId) params.append('report', this.queries.reportId);
+      if (this.selectedFilters.receiptType) params.append('receipt_type', this.selectedFilters.receiptType);
+      if (this.queries.receiptId) params.append('receipt', this.queries.receiptId);
+      if (this.selectedFilters.objectOfExpenditure) params.append('object_of_expenditure', this.selectedFilters.objectOfExpenditure);
+    },
+
     fetchData(url = null) {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('collection')) {
@@ -645,24 +666,7 @@ function resourcesData() {
 
         const params = new URLSearchParams();
         params.append('limit', '20');
-        if (this.selectedFilters.district) params.append('district', this.selectedFilters.district.id);
-        if (this.selectedFilters.department) params.append('department', this.selectedFilters.department);
-        if (this.selectedFilters.institutionType) params.append('institution_type', this.selectedFilters.institutionType);
-        if (this.collection === 'Instituciones' && this.queries.institution) params.append('name', this.queries.institution);
-        if (this.selectedFilters.disbursementOrigin) params.append('funds_origin', this.selectedFilters.disbursementOrigin);
-        if (this.selectedFilters.disbursementBefore) params.append('disbursement_date_before', this.selectedFilters.disbursementBefore);
-        if (this.selectedFilters.disbursementAfter) params.append('disbursement_date_after', this.selectedFilters.disbursementAfter);
-        if (this.selectedFilters.reportDateBefore) params.append('report_date_before', this.selectedFilters.reportDateBefore);
-        if (this.selectedFilters.reportDateAfter) params.append('report_date_after', this.selectedFilters.reportDateAfter);
-        if (this.selectedFilters.receiptDateBefore) params.append('receipt_date_before', this.selectedFilters.receiptDateBefore);
-        if (this.selectedFilters.receiptDateAfter) params.append('receipt_date_after', this.selectedFilters.receiptDateAfter);
-        if (this.selectedFilters.resolution) params.append('resolution', this.selectedFilters.resolution.id);
-        if (this.selectedFilters.institution) params.append('institution', this.selectedFilters.institution.id);
-        if (this.queries.disbursementId) params.append('disbursement', this.queries.disbursementId);
-        if (this.queries.reportId) params.append('report', this.queries.reportId);
-        if (this.selectedFilters.receiptType) params.append('receipt_type', this.selectedFilters.receiptType);
-        if (this.queries.receiptId) params.append('receipt', this.queries.receiptId);
-        if (this.selectedFilters.objectOfExpenditure) params.append('object_of_expenditure', this.selectedFilters.objectOfExpenditure);
+        this.setParams(params);
         url = endpoints[this.collection] + `?${params.toString()}`;
       }
 
@@ -767,19 +771,27 @@ function resourcesData() {
       })
     },
     getExportUrl(format) {
-      let base = `/export/?format=${format}&collection=`;
+      const params = new URLSearchParams();
+      params.append('format', format);
+      this.setParams(params);
       switch (this.collection) {
         case "Instituciones":
-          return base + 'institutions';
+          params.append('collection', 'institutions');
+          break;
         case "Desembolsos":
-          return base + 'disbursements';
+          params.append('collection', 'disbursements');
+          break;
         case "Rendiciones":
-          return base + 'reports';
+          params.append('collection', 'reports');
+          break;
         case "Comprobantes":
-          return base + 'receipts';
+          params.append('collection', 'receipts');
+          break;
         case 'Detalles de comprobante':
-          return base + 'receipt-items'
+          params.append('collection', 'receipt-items');
+          break;
       }
+      return `/export/?${params.toString()}`;
     }
   };
 }

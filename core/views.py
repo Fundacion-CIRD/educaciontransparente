@@ -1,25 +1,14 @@
-from django.db.models import Sum, ExpressionWrapper, F, IntegerField, Value
-from django.db.models.functions import Coalesce
+from django.db.models import Sum
 from rest_framework import viewsets
-from django_filters import rest_framework as filters
 
 from accountability.models import Receipt, Disbursement
+from core.filters import InstitutionFilter
 from core.models import Institution, Department, District
 from core.serializers import (
     InstitutionSerializer,
     DepartmentSerializer,
     DistrictSerializer,
 )
-
-
-class InstitutionFilter(filters.FilterSet):
-    district = filters.NumberFilter(field_name="establishment__locality__district_id")
-    department = filters.NumberFilter(
-        field_name="establishment__locality__district__department_id"
-    )
-    id = filters.NumberFilter(field_name="id")
-    institution_type = filters.CharFilter()
-    name = filters.CharFilter(field_name="name", lookup_expr="icontains")
 
 
 class InstitutionViewSet(viewsets.ReadOnlyModelViewSet):
