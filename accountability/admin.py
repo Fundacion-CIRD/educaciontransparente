@@ -84,19 +84,26 @@ class DisbursementAdmin(ModelAdmin):
 
     @display(description="Monto desembolsado", ordering="amount_disbursed")
     def get_amount_disbursed(self, obj):
-        return obj.amount_disbursed
-        return format_number(obj.amount_disbursed, ",", thousand_sep=".")
+        try:
+            return format_number(obj.amount_disbursed, ",", thousand_sep=".")
+        except:
+            return obj.amount_disbursed
 
 
 @register(Report)
 class ReportAdmin(ModelAdmin):
     list_display = ("disbursement", "status", "delivered_via", "updated_at")
-    list_filter = ("status", "updated_at")
+    list_filter = (
+        "status",
+        ("report_date", RangeDateFilter),
+        ("disbursement__disbursement_date", RangeDateFilter),
+        ("updated_at", RangeDateFilter),
+    )
     autocomplete_fields = ("disbursement",)
     inlines = [DocumentInline]
     search_fields = (
         "disbursement__institution__name",
-        "disbursement__resolution__document_number",
+        "disbursement__resolution__full_document_number",
     )
 
 

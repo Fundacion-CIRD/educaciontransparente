@@ -158,6 +158,7 @@ class Report(models.Model):
         choices=ReportStatus.choices,
         default=ReportStatus.pending,
         editable=False,
+        verbose_name="estado",
     )
     report_date = models.DateField(
         verbose_name="fecha de rendición", editable=False, null=True
