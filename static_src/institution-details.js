@@ -11,6 +11,8 @@ const SORT_MAP = {
 
 const MILLION = 1000000;
 
+var treemapChart = null;
+
 function getYearlyReportChartData(yearlyReport) {
   const years = [];
   const totalDisbursed = [];
@@ -113,9 +115,6 @@ function initBarChart() {
   const barChart = echarts.init(document.getElementById('bar-chart'));
   const [years, chartData] = getYearlyReportChartData(yearlyReport);
   const barOption = {
-    // title: {
-    //   text: 'Recibido vs Rendido por Año'
-    // },
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -144,6 +143,13 @@ function initBarChart() {
   }
   barChart.setOption(barOption);
   return [barChart, years];
+}
+
+async function initTreemapChart(institutionId, year) {
+  if (!treemapChart)
+    treemapChart = echarts.init(document.getElementById('treemap-chart'));
+  const treemapOption = await generateTreemapOption(institutionId, year);
+  treemapChart.setOption(treemapOption);
 }
 
 async function generateTreemapOption(institutionId, year) {
@@ -187,16 +193,12 @@ function institutionDetails() {
     institutionId: null,
     barChart: null,
     years: [],
-    treemapChart: null,
-    treemapChartData: null,
     async init() {
       this.institutionId = document.location.pathname.split('/')[2];
       const [barChart, years] = initBarChart();
       this.barChart = barChart;
       this.years = years;
-      this.treemapChart = echarts.init(document.getElementById('icicle-chart'));
-      const treemapOption = await generateTreemapOption(this.institutionId, this.year);
-      this.treemapChart.setOption(treemapOption);
+      void initTreemapChart(this.institutionId, this.year);
       const data = await fetchResults(this.institutionId, this.year);
       this.results = data.results;
       this.summary = data.summary;
@@ -224,7 +226,7 @@ function institutionDetails() {
       this.results = data.results;
       this.summary = data.summary;
       const treemapOption = await generateTreemapOption(this.institutionId, this.year);
-      this.treemapChart.setOption(treemapOption);
+      treemapChart.setOption(treemapOption);
       this.highlightChart();
     },
     formatDate(dateStr) {
