@@ -390,3 +390,11 @@ CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:8000").s
 )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600
+
+DATE_INPUT_FORMATS = [
+    "%Y-%m-%d",  # '2006-10-25'
+    "%d/%m/%Y",  # '25/10/2006'
+    "%d/%m/%y",  # '25/10/06'
+    "%d %b %Y",  # '25 Oct 2006'
+    "%d %B %Y",  # '25 October 2006'
+]

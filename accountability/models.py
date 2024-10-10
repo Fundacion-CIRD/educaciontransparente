@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
+from dateutil.relativedelta import relativedelta
 from django.db.models.functions import Coalesce
 
 INSTITUTION_MODEL = "core.Institution"
@@ -134,9 +135,15 @@ class Disbursement(models.Model):
         except Exception:
             return f"Desembolso {self.id}: {self.institution.name}"
 
+    @property
+    def reported_total(self):
+        return self.reports.receipts.aggregate(
+            total=Coalesce(models.Sum("receipt_total"), models.Value(0))
+        )["total"]
+
     def save(self, *args, **kwargs):
-        if not self.due_date and self.disbursement_date:
-            self.due_date = self.disbursement_date + timedelta(days=105)
+        if self.disbursement_date:
+            self.due_date = self.disbursement_date + relativedelta(months=3, days=15)
         super().save(*args, **kwargs)
 
 
@@ -179,6 +186,12 @@ class Report(models.Model):
         editable=False,
         related_name="reports",
     )
+
+    @property
+    def reported_total(self):
+        return self.receipts.aggregate(
+            total=Coalesce(models.Sum("receipt_total"), models.Value(0))
+        )["total"]
 
     class Meta:
         verbose_name = "rendición"
@@ -277,9 +290,13 @@ class Receipt(models.Model):
         related_name="receipts",
         verbose_name="tipo de comprobante",
     )
-    receipt_date = models.DateField(verbose_name="fecha", null=True)
+    receipt_date = models.DateField(verbose_name="fecha de comprobante", null=True)
     receipt_number = models.CharField(
-        verbose_name="número de comprobante", max_length=30
+        verbose_name="número de comprobante",
+        max_length=30,
+        default="",
+        blank=True,
+        help_text='Si deja el campo en blanco, se mostrará "Sin datos"',
     )
     provider = models.ForeignKey(
         Provider,

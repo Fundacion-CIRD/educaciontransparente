@@ -3,10 +3,13 @@ from django.contrib.admin import (
     display,
     RelatedFieldListFilter,
 )
-from django.db.models import Sum, ExpressionWrapper, F, IntegerField
+from django.core.exceptions import ValidationError
+from django.core.validators import EMPTY_VALUES
+from django.db.models import Sum, ExpressionWrapper, F, IntegerField, QuerySet
+from django.http import HttpRequest
 from django.utils.numberformat import format as format_number
 from unfold.admin import ModelAdmin, StackedInline
-from unfold.contrib.filters.admin import RangeDateFilter
+from unfold.contrib.filters.admin import RangeDateFilter as BaseRangeDateFilter
 
 from accountability.models import (
     Disbursement,
@@ -22,6 +25,23 @@ from accountability.models import (
     DisbursementOrigin,
 )
 from core.admin import DocumentInline
+
+
+class RangeDateFilter(BaseRangeDateFilter):
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
+        filters = {}
+        value_from = self.used_parameters.get(self.field_path + "_from", None)
+        if value_from not in EMPTY_VALUES:
+            d, m, y = value_from.split("/")
+            filters.update({self.parameter_name + "__gte": f"{y}-{m}-{d}"})
+        value_to = self.used_parameters.get(self.field_path + "_to", None)
+        if value_to not in EMPTY_VALUES:
+            d, m, y = value_to.split("/")
+            filters.update({self.parameter_name + "__lte": f"{y}-{m}-{d}"})
+        try:
+            return queryset.filter(**filters)
+        except (ValueError, ValidationError):
+            return None
 
 
 @register(Resolution)
@@ -48,6 +68,7 @@ class DisbursementAdmin(ModelAdmin):
         ("disbursement_date", RangeDateFilter),
         ("due_date", RangeDateFilter),
     )
+    list_filter_submit = True
     search_fields = (
         "institution__name",
         "resolution__full_document_number",
@@ -56,6 +77,7 @@ class DisbursementAdmin(ModelAdmin):
     )
     autocomplete_fields = ("institution", "resolution", "origin_details")
     inlines = [DocumentInline]
+    readonly_fields = ("due_date",)
     fieldsets = [
         (
             "Institución",
@@ -67,7 +89,7 @@ class DisbursementAdmin(ModelAdmin):
                 "fields": [
                     "resolution",
                     "resolution_amount",
-                    "disbursement_date",
+                    ("disbursement_date", "due_date"),
                     "amount_disbursed",
                     "funds_origin",
                     "origin_details",
@@ -92,13 +114,20 @@ class DisbursementAdmin(ModelAdmin):
 
 @register(Report)
 class ReportAdmin(ModelAdmin):
-    list_display = ("disbursement", "status", "delivered_via", "updated_at")
+    list_display = (
+        "disbursement",
+        "status",
+        "delivered_via",
+        "report_date",
+        "updated_at",
+    )
     list_filter = (
         "status",
         ("report_date", RangeDateFilter),
         ("disbursement__disbursement_date", RangeDateFilter),
         ("updated_at", RangeDateFilter),
     )
+    list_filter_submit = True
     autocomplete_fields = ("disbursement",)
     inlines = [DocumentInline]
     search_fields = (
@@ -150,6 +179,7 @@ class ReceiptAdmin(ModelAdmin):
         "receipt_total",
     )
     list_filter = [("receipt_date", RangeDateFilter)]
+    list_filter_submit = True
     autocomplete_fields = ("receipt_type", "report", "provider")
     compressed_fields = True
     fieldsets = [

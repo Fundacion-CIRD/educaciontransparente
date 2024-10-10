@@ -43,7 +43,9 @@ class DisbursementViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ReportViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Report.objects.all().order_by("-disbursement__disbursement_date")
+    queryset = Report.objects.all().order_by(
+        "-disbursement__resolution__document_year", "-disbursement__disbursement_date"
+    )
     serializer_class = ReportSerializer
     filterset_class = ReportFilter
 

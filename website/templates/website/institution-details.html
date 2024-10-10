@@ -34,14 +34,16 @@
           <table class="table is-striped is-fullwidth is-hoverable">
             <thead>
             <tr>
-              <template x-for="header in headers" :key="header">
-                <th value="header" @click="sortBy(header)">
-                  <span x-text="header"></span>&nbsp;
-                  {#                <i#}
-                  {#                  :class="{'fas': true, 'fa-chevron-up': !sortDesc, 'fa-chevron-down': sortDesc, 'visible': sortCol === header}"#}
-                  {#                  class="fas fa-chevron-up"></i>#}
-                </th>
-              </template>
+              <th value="header">Año</th>
+              <th value="header">Director</th>
+              <th value="header">Doc. Director</th>
+              <th value="header">Resolución</th>
+              <th value="header">Monto Resol.</th>
+              <th value="header">Fecha Desembolso</th>
+              <th value="header">Monto Desembolsado</th>
+              <th value="header">Fecha a rendir</th>
+              <th value="header">Monto rendido</th>
+              <th value="header">Detalle de rendición</th>
             </tr>
             </thead>
             <tbody>
@@ -72,6 +74,8 @@
                 <span :class="tagColor(report.disbursement.dueDate)"
                       x-text="formatDate(report.disbursement.dueDate)"></span>
                 </td>
+                <td class="has-text-right"
+                    x-text="new Intl.NumberFormat('es-PY').format(report.reportedAmount || 0)"></td>
                 <td class="has-text-centered">
                   <a :href="`/instituciones/${report.disbursement.institutionId}/rendiciones/${report.id}/`">Ver</a>
                 </td>

@@ -26,7 +26,7 @@
               </button>
             </td>
             <td>{{ receipt.receipt_type.name }}</td>
-            <td>{{ receipt.receipt_number }}</td>
+            <td>{% if receipt.receipt_number %}{{ receipt.receipt_number }}{% else %}Sin datos{% endif %}</td>
             {% if receipt.provider %}
               <td>{{ receipt.provider.name }}</td>
               <td>{{ receipt.provider.ruc }}</td>

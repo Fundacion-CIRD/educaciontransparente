@@ -7,6 +7,7 @@ const sortMap = {
   'Fecha Desembolso': 'disbursement_date',
   'Monto Desembolsado': 'amount_disbursed',
   'Fecha a rendir': 'due_date',
+  'Monto rendido': 'total_reported',
 }
 
 function institutionDetails() {
@@ -21,6 +22,7 @@ function institutionDetails() {
       'Fecha Desembolso',
       'Monto Desembolsado',
       'Fecha a rendir',
+      'Monto rendido',
       'Detalle de rendición',
     ],
     results: [],

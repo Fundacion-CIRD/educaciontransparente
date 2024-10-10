@@ -4,13 +4,10 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.forms.widgets import WysiwygWidget
 
-from unfold.contrib.inlines.admin import NonrelatedTabularInline
-
 from core.models import (
     Department,
     District,
     Institution,
-    InstitutionUser,
     Locality,
     Establishment,
     Document,
@@ -36,7 +33,7 @@ class DistrictAdmin(ModelAdmin):
 @register(Locality)
 class LocalityAdmin(ModelAdmin):
     list_display = ("name", "district")
-    search_fields = ("name", "district")
+    search_fields = ("name", "district__name")
     list_filter = ("district__department",)
     ordering = (
         "district__name",
