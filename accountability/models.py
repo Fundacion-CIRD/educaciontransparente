@@ -146,6 +146,15 @@ class Disbursement(models.Model):
             self.due_date = self.disbursement_date + relativedelta(months=3, days=15)
         super().save(*args, **kwargs)
 
+    def clean(self):
+        if (
+            self.disbursement_date
+            and self.disbursement_date.year < self.resolution.document_year
+        ):
+            raise ValidationError(
+                "La fecha de desembolso es anterior al año de resolución"
+            )
+
 
 class Report(models.Model):
     class ReportStatus(models.TextChoices):
