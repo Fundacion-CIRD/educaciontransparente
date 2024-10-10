@@ -134,6 +134,7 @@ class ReportAdmin(ModelAdmin):
         "disbursement__institution__name",
         "disbursement__resolution__full_document_number",
     )
+    readonly_fields = ("status", "report_date")
 
 
 @register(ReceiptType)

@@ -1,10 +1,13 @@
-from datetime import timedelta
+import logging
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.db import models
 from dateutil.relativedelta import relativedelta
 from django.db.models.functions import Coalesce
+from django.dispatch import receiver
+
+logger = logging.getLogger(__name__)
 
 INSTITUTION_MODEL = "core.Institution"
 
@@ -199,7 +202,11 @@ class Report(models.Model):
     @property
     def reported_total(self):
         return self.receipts.aggregate(
-            total=Coalesce(models.Sum("receipt_total"), models.Value(0))
+            total=Coalesce(
+                models.Sum("receipt_total"),
+                models.Value(0),
+                output_field=models.IntegerField(),
+            )
         )["total"]
 
     class Meta:
@@ -398,3 +405,17 @@ class ReceiptItem(models.Model):
         if not self.description:
             self.description = self.object_of_expenditure.value
         super().save(*args, **kwargs)
+
+
+@receiver(models.signals.post_save, sender=Receipt)
+def update_report_status(sender, instance, **kwargs):
+    try:
+        report = instance.report
+        if report.reported_total >= report.disbursement.amount_disbursed:
+            if report.status == report.ReportStatus.pending.value:
+                report.report_date = instance.updated_at
+            report.status = report.ReportStatus.finished.value
+            report.save()
+    except Exception as e:
+        logger.error(f"No se pudo actualizar el reporte. {e}", exc_info=True)
+        pass
