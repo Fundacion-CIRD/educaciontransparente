@@ -162,7 +162,7 @@ class Disbursement(models.Model):
 class Report(models.Model):
     class ReportStatus(models.TextChoices):
         finished = "cancelado", "Cancelado"
-        pending = "pendente", "Pendente"
+        pending = "pendente", "Pendiente"
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="creado el")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="actualizado el")
