@@ -77,6 +77,7 @@ class DisbursementSerializer(serializers.ModelSerializer):
             "institution_id",
             "institution_name",
             "comments",
+            "is_historical",
         )
 
 

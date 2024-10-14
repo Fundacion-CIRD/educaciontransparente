@@ -10,6 +10,7 @@ from django.http import HttpRequest
 from django.utils.numberformat import format as format_number
 from unfold.admin import ModelAdmin, StackedInline
 from unfold.contrib.filters.admin import RangeDateFilter as BaseRangeDateFilter
+from unfold.typing import FieldsetsType
 
 from accountability.models import (
     Disbursement,
@@ -78,26 +79,33 @@ class DisbursementAdmin(ModelAdmin):
     autocomplete_fields = ("institution", "resolution", "origin_details")
     inlines = [DocumentInline]
     readonly_fields = ("due_date",)
-    fieldsets = [
-        (
-            "Institución",
-            {"fields": ["institution", ("principal_name", "principal_issued_id")]},
-        ),
-        (
-            "Desembolso",
-            {
-                "fields": [
-                    "resolution",
-                    "resolution_amount",
-                    ("disbursement_date", "due_date"),
-                    "amount_disbursed",
-                    "funds_origin",
-                    "origin_details",
-                    "payment_type",
-                ]
-            },
-        ),
-    ]
+
+    def get_fieldsets(self, request: HttpRequest, obj=None) -> FieldsetsType:
+        fieldsets = [
+            (
+                "Institución",
+                {"fields": ["institution", ("principal_name", "principal_issued_id")]},
+            ),
+            (
+                "Desembolso",
+                {
+                    "fields": [
+                        "resolution",
+                        "resolution_amount",
+                        ("disbursement_date", "due_date"),
+                        "amount_disbursed",
+                        "funds_origin",
+                        "origin_details",
+                        "payment_type",
+                    ]
+                },
+            ),
+        ]
+        if request.user.is_superuser:
+            fieldsets[1][1]["fields"] += [
+                "is_historical",
+            ]
+        return fieldsets
 
     def get_queryset(self, request):
         if request.user.is_superuser:
@@ -134,7 +142,7 @@ class ReportAdmin(ModelAdmin):
         "disbursement__institution__name",
         "disbursement__resolution__full_document_number",
     )
-    readonly_fields = ("status", "report_date")
+    readonly_fields = ("status", "report_date", "reported_total")
 
 
 @register(ReceiptType)

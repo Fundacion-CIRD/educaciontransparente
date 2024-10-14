@@ -71,7 +71,7 @@
                 <td class="has-text-right"
                     x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
                 <td class="has-text-centered">
-                <span :class="tagColor(report.disbursement.dueDate)"
+                <span :class="tagColor(report)"
                       x-text="formatDate(report.disbursement.dueDate)"></span>
                 </td>
                 <td class="has-text-right"

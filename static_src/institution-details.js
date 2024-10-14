@@ -105,6 +105,7 @@ function parseTreemapOption(treeData) {
           position: 'insideTopLeft',
           formatter: (params) => barchartFormatter(params, true),
         },
+        leafDepth: 1,
         data,
       },
     ],
@@ -149,6 +150,7 @@ async function initTreemapChart(institutionId, year) {
   if (!treemapChart)
     treemapChart = echarts.init(document.getElementById('treemap-chart'));
   const treemapOption = await generateTreemapOption(institutionId, year);
+  console.log(treemapOption);
   treemapChart.setOption(treemapOption);
 }
 
@@ -234,9 +236,13 @@ function institutionDetails() {
       return `${day}/${month}/${year}`;
     },
     formatNumber,
-    tagColor(inputDate) {
+    tagColor(report) {
+      if (report.disbursement.isHistorical || report.status === 'cancelado') {
+        return '';
+      }
+      const {dueDate} = report.disbursement;
       const today = new Date();
-      const targetDate = new Date(inputDate);
+      const targetDate = new Date(dueDate);
 
       // Calculate the difference in time (in milliseconds)
       const timeDiff = targetDate - today;

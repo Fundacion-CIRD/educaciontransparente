@@ -125,6 +125,11 @@ class Disbursement(models.Model):
         "core.Picture", related_name="expense_report", verbose_name="imágenes"
     )
     comments = models.TextField(default="", blank=True, verbose_name="observaciones")
+    is_historical = models.BooleanField(
+        default=False,
+        verbose_name="histórico",
+        help_text="Si activa el histórico, se desactiva el semáforo de fecha de rendición.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
