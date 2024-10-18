@@ -56,21 +56,8 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
             .distinct()
             .aggregate(total=Sum("amount_disbursed"))["total"]
         )
-        reported_qs = qs.annotate(
-            total_reported=Coalesce(
-                Sum(
-                    ExpressionWrapper(
-                        F("receipts__items__unit_price")
-                        * F("receipts__items__quantity"),
-                        output_field=IntegerField(),
-                    )
-                ),
-                Value(0, output_field=IntegerField()),
-            )
-        )
-        total_reported = reported_qs.aggregate(
-            reported=Sum("total_reported", distinct=True)
-        )["reported"]
+        receipts = Receipt.objects.filter(report__in=qs)
+        total_reported = receipts.aggregate(reported=Sum("receipt_total"))["reported"]
         response_data = super().list(request, *args, **kwargs).data
         response_data["summary"] = {
             "total_disbursed": total_disbursed,
