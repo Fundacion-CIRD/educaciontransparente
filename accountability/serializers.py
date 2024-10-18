@@ -187,7 +187,7 @@ class AccountObjectChartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccountObject
-        fields = ["key", "value", "children", "total_expenditure"]
+        fields = ["key", "value", "children", "total_expenditure", "comments"]
 
     def get_children(self, obj):
         year = self.context.get("year")

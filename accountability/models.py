@@ -255,6 +255,7 @@ class AccountObject(models.Model):
         null=True,
         blank=True,
     )
+    comments = models.TextField(default="", verbose_name="observaciones", blank=True)
 
     class Meta:
         verbose_name = "objeto"

@@ -68,12 +68,12 @@ function barchartFormatter(element, newline = true) {
 function parseChartElement(element) {
   if (!element.children) {
     return {
-      name: element.value,
+      name: `${element.key}: ${element.value}`,
       value: element.totalExpenditure,
     };
   }
   return {
-    name: element.value,
+    name: `${element.key}: ${element.value}`,
     children: element.children.map(parseChartElement),
   };
 }
@@ -150,8 +150,20 @@ async function initTreemapChart(institutionId, year) {
   if (!treemapChart)
     treemapChart = echarts.init(document.getElementById('treemap-chart'));
   const treemapOption = await generateTreemapOption(institutionId, year);
-  console.log(treemapOption);
   treemapChart.setOption(treemapOption);
+}
+
+function setComments(results) {
+  const commentsDiv = document.getElementById('accountObjectComments')
+  commentsDiv.innerHTML = '';
+  for (const result of results) {
+    if (result.comments) {
+      const p = document.createElement('p');
+      p.className = 'help';
+      p.textContent = `${result.key}: ${result.comments}`;
+      commentsDiv.appendChild(p);
+    }
+  }
 }
 
 async function generateTreemapOption(institutionId, year) {
@@ -160,6 +172,7 @@ async function generateTreemapOption(institutionId, year) {
   if (year) params.append('year', year);
   const response = await fetch(`/api/account-objects/?${params.toString()}`);
   const data = await response.json();
+  setComments(data.results);
   return parseTreemapOption(data);
 }
 
@@ -200,7 +213,7 @@ function institutionDetails() {
       const [barChart, years] = initBarChart();
       this.barChart = barChart;
       this.years = years;
-      void initTreemapChart(this.institutionId, this.year);
+      await initTreemapChart(this.institutionId, this.year);
       const data = await fetchResults(this.institutionId, this.year);
       this.results = data.results;
       this.summary = data.summary;
