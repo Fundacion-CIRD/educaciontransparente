@@ -253,14 +253,19 @@ function institutionDetails() {
     },
     formatNumber,
     tagColor(report) {
+      const {balance, reportDate, disbursement: {dueDate}} = report;
+      if (balance < 0 && reportDate <= dueDate) {
+        return '';
+      }
+
       if (report.disbursement.isHistorical || report.status === 'cancelado') {
         return '';
       }
-      const {dueDate} = report.disbursement;
-      if (report.reportDate && report.reportDate > dueDate) {
+
+      if (reportDate && reportDate > dueDate) {
         return 'is-danger';
       }
-      if (report.balance && report.balance > 0) {
+      if (balance && balance > 0) {
         return 'is-danger';
       }
       const today = new Date();
