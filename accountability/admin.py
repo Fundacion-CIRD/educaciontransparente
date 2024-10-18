@@ -8,6 +8,7 @@ from django.core.validators import EMPTY_VALUES
 from django.db.models import Sum, ExpressionWrapper, F, IntegerField, QuerySet
 from django.http import HttpRequest
 from django.utils.numberformat import format as format_number
+from unfold import admin
 from unfold.admin import ModelAdmin, StackedInline
 from unfold.contrib.filters.admin import RangeDateFilter as BaseRangeDateFilter
 from unfold.typing import FieldsetsType
@@ -142,7 +143,11 @@ class ReportAdmin(ModelAdmin):
         "disbursement__institution__name",
         "disbursement__resolution__full_document_number",
     )
-    readonly_fields = ("status", "report_date", "reported_total")
+    readonly_fields = ("status", "get_report_total")
+
+    @admin.display(description="Total reportado")
+    def get_report_total(self, obj):
+        return obj.reported_total
 
 
 @register(ReceiptType)

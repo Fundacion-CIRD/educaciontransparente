@@ -69,9 +69,9 @@ function institutionDetails() {
       const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
 
       if (dayDiff < 0) {
-        return 'tag is-danger'; // Date is lower than today
+        return 'is-danger'; // Date is lower than today
       } else if (dayDiff <= 10) {
-        return 'tag is-warning'; // Date is at most 10 days into the future
+        return 'is-warning'; // Date is at most 10 days into the future
       } else {
         return ''; // Otherwise, return an empty string
       }

@@ -35,7 +35,7 @@ class ReportFilter(filters.FilterSet):
     )
 
     year = filters.NumberFilter(
-        field_name="disbursement__disbursement_date__year", label="Año"
+        field_name="disbursement__resolution__document_year", label="Año"
     )
     disbursement = filters.ModelChoiceFilter(
         queryset=Disbursement.objects.all(),

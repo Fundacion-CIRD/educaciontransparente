@@ -30,6 +30,21 @@
     <section class="section">
       <div class="container">
         <h3 class="is-size-3 mb-4 has-text-weight-semibold">Desembolsos y Rendiciones</h3>
+        <div class="my-4 is-flex is-gap-4 is-flex-wrap-wrap">
+          <span class="has-text-weight-medium">Colores:</span>
+          <span>
+            <i class="fa-solid fa-square is-color-warning"></i>
+            Fecha a rendir próxima a vencimiento
+          </span>
+          <span>
+            <i class="fa-solid fa-square is-color-danger"></i>
+            Irregularidad en rendición
+          </span>
+          <span>
+            <i class="fa-regular fa-square"></i>
+            Regular
+          </span>
+        </div>
         <div class="table-container">
           <table class="table is-striped is-fullwidth is-hoverable">
             <thead>
@@ -41,14 +56,15 @@
               <th value="header">Monto Resol.</th>
               <th value="header">Fecha Desembolso</th>
               <th value="header">Monto Desembolsado</th>
-              <th value="header">Fecha a rendir</th>
+              <th value="header">Fecha límite de rendición</th>
+              <th value="header">Fecha de rendición</th>
               <th value="header">Monto rendido</th>
               <th value="header">Detalle de rendición</th>
             </tr>
             </thead>
             <tbody>
             <template x-for="report in results" :key="report.id">
-              <tr>
+              <tr :class="tagColor(report)">
                 <td class="has-text-centered" x-text="report.disbursement.resolution.documentYear"></td>
                 <td x-text="report.disbursement.principalName"></td>
                 <td class="has-text-right" x-text="formatNumber(report.disbursement.principalIssuedId)"></td>
@@ -71,8 +87,10 @@
                 <td class="has-text-right"
                     x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
                 <td class="has-text-centered">
-                <span :class="tagColor(report)"
-                      x-text="formatDate(report.disbursement.dueDate)"></span>
+                  <span x-text="formatDate(report.disbursement.dueDate)"></span>
+                </td>
+                <td class="has-text-centered">
+                  <span x-text="formatDate(report.reportDate)"></span>
                 </td>
                 <td class="has-text-right"
                     x-text="new Intl.NumberFormat('es-PY').format(report.reportedAmount || 0)"></td>

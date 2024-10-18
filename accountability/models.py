@@ -184,9 +184,7 @@ class Report(models.Model):
         editable=False,
         verbose_name="estado",
     )
-    report_date = models.DateField(
-        verbose_name="fecha de rendición", editable=False, null=True
-    )
+    report_date = models.DateField(verbose_name="fecha de rendición", null=True)
     delivered_via = models.CharField(
         max_length=250,
         verbose_name="recepción",
@@ -416,9 +414,10 @@ class ReceiptItem(models.Model):
 def update_report_status(sender, instance, **kwargs):
     try:
         report = instance.report
-        if report.reported_total >= report.disbursement.amount_disbursed:
-            if report.status == report.ReportStatus.pending.value:
-                report.report_date = instance.updated_at
+        if (
+            report.status == report.ReportStatus.pending.value
+            and report.reported_total >= report.disbursement.amount_disbursed
+        ):
             report.status = report.ReportStatus.finished.value
             report.save()
     except Exception as e:

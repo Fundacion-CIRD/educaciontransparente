@@ -232,6 +232,9 @@ function institutionDetails() {
       this.highlightChart();
     },
     formatDate(dateStr) {
+      if (!dateStr) {
+        return '';
+      }
       const [year, month, day] = dateStr.split('-');
       return `${day}/${month}/${year}`;
     },
@@ -241,6 +244,12 @@ function institutionDetails() {
         return '';
       }
       const {dueDate} = report.disbursement;
+      if (report.reportDate && report.reportDate > dueDate) {
+        return 'is-danger';
+      }
+      if (report.balance && report.balance > 0) {
+        return 'is-danger';
+      }
       const today = new Date();
       const targetDate = new Date(dueDate);
 
@@ -251,12 +260,11 @@ function institutionDetails() {
       const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
 
       if (dayDiff < 0) {
-        return 'tag is-danger'; // Date is lower than today
+        return 'is-danger'; // Date is lower than today
       } else if (dayDiff <= 10) {
-        return 'tag is-warning'; // Date is at most 10 days into the future
-      } else {
-        return ''; // Otherwise, return an empty string
+        return 'is-warning'; // Date is at most 10 days into the future
       }
+      return ''; // Otherwise, return an empty string
     }
   }
 }
