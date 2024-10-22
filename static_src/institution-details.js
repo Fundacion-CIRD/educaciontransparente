@@ -180,7 +180,7 @@ async function fetchResults(institutionId, year) {
   const params = new URLSearchParams();
   params.append('institution', institutionId)
   if (year) params.append('year', year.toString());
-  const response = await fetch(`/api/reports/?${params.toString()}`);
+  const response = await fetch(`/api/disbursements/?${params.toString()}`);
   return await response.json();
 }
 
@@ -252,37 +252,42 @@ function institutionDetails() {
       return `${day}/${month}/${year}`;
     },
     formatNumber,
-    tagColor(report) {
-      const {balance, reportDate, disbursement: {dueDate}} = report;
+    tagColor(disbursement) {
+      const {dueDate} = disbursement;
+
+      if (disbursement.isHistorical) {
+        return '';
+      }
+
+      if (!disbursement.report) {
+        const today = new Date();
+        const targetDate = new Date(dueDate);
+
+        // Calculate the difference in time (in milliseconds)
+        const timeDiff = targetDate - today;
+
+        // Calculate the difference in days
+        const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+        if (dayDiff < 0) {
+          return 'is-danger'; // Date is lower than today
+        } else if (dayDiff <= 10) {
+          return 'is-warning'; // Date is at most 10 days into the future
+        }
+        return ''; // Otherwise, return an empty string
+      }
+
+      const {balance, reportDate} = disbursement.report;
+      console.log(disbursement);
       if (balance < 0 && reportDate <= dueDate) {
         return '';
       }
-
-      if (report.disbursement.isHistorical || report.status === 'cancelado') {
-        return '';
-      }
-
       if (reportDate && reportDate > dueDate) {
         return 'is-danger';
       }
       if (balance && balance > 0) {
         return 'is-danger';
       }
-      const today = new Date();
-      const targetDate = new Date(dueDate);
-
-      // Calculate the difference in time (in milliseconds)
-      const timeDiff = targetDate - today;
-
-      // Calculate the difference in days
-      const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
-
-      if (dayDiff < 0) {
-        return 'is-danger'; // Date is lower than today
-      } else if (dayDiff <= 10) {
-        return 'is-warning'; // Date is at most 10 days into the future
-      }
-      return ''; // Otherwise, return an empty string
     }
   }
 }

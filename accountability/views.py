@@ -37,9 +37,31 @@ class ResolutionViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class DisbursementViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Disbursement.objects.all()
+    queryset = Disbursement.objects.all().order_by(
+        "-resolution__document_year", "-disbursement_date"
+    )
     serializer_class = DisbursementSerializer
     filterset_class = DisbursementFilter
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["disbursement"] = True
+        return context
+
+    def list(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        total_disbursed = qs.distinct().aggregate(total=Sum("amount_disbursed"))[
+            "total"
+        ]
+        reports = Report.objects.filter(disbursement__in=qs).distinct()
+        receipts = Receipt.objects.filter(report__in=reports).distinct()
+        total_reported = receipts.aggregate(reported=Sum("receipt_total"))["reported"]
+        response_data = super().list(request, *args, **kwargs).data
+        response_data["summary"] = {
+            "total_disbursed": total_disbursed,
+            "total_reported": total_reported,
+        }
+        return Response(data=response_data)
 
 
 class ReportViewSet(viewsets.ReadOnlyModelViewSet):
@@ -48,22 +70,6 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = ReportSerializer
     filterset_class = ReportFilter
-
-    def list(self, request, *args, **kwargs):
-        qs = self.filter_queryset(self.get_queryset())
-        total_disbursed = (
-            Disbursement.objects.filter(reports__in=qs)
-            .distinct()
-            .aggregate(total=Sum("amount_disbursed"))["total"]
-        )
-        receipts = Receipt.objects.filter(report__in=qs)
-        total_reported = receipts.aggregate(reported=Sum("receipt_total"))["reported"]
-        response_data = super().list(request, *args, **kwargs).data
-        response_data["summary"] = {
-            "total_disbursed": total_disbursed,
-            "total_reported": total_reported,
-        }
-        return Response(data=response_data)
 
 
 class ReceiptViewSet(viewsets.ReadOnlyModelViewSet):

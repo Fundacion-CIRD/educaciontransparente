@@ -59,6 +59,7 @@ class DisbursementSerializer(serializers.ModelSerializer):
     payment_type = PaymentTypeSerializer(read_only=True)
     institution_id = serializers.PrimaryKeyRelatedField(read_only=True)
     institution_name = serializers.CharField(source="institution.name", read_only=True)
+    report = serializers.SerializerMethodField()
 
     class Meta:
         model = Disbursement
@@ -78,29 +79,33 @@ class DisbursementSerializer(serializers.ModelSerializer):
             "institution_name",
             "comments",
             "is_historical",
+            "report",
         )
 
+    def get_report(self, obj):
+        if self.context.get("disbursement"):
+            try:
+                return DisbursementReportSerializer(instance=obj.report).data
+            except Report.DoesNotExist:
+                return None
 
-class ReportSerializer(serializers.ModelSerializer):
+
+class DisbursementReportSerializer(serializers.ModelSerializer):
     reported_amount = serializers.SerializerMethodField()
     balance = serializers.SerializerMethodField()
-    disbursement = DisbursementSerializer(read_only=True)
 
     class Meta:
         model = Report
-        fields = (
+        fields = [
             "id",
             "updated_at",
-            "institution_id",
-            "disbursement",
             "status",
             "report_date",
             "reported_amount",
             "balance",
             "delivered_via",
             "comments",
-            "institution_id",
-        )
+        ]
 
     @staticmethod
     def get_reported_amount(obj):
@@ -114,6 +119,14 @@ class ReportSerializer(serializers.ModelSerializer):
         if not disbursed or not reported:
             return None
         return disbursed - reported
+
+
+class ReportSerializer(DisbursementReportSerializer):
+    disbursement = DisbursementSerializer(read_only=True)
+
+    class Meta:
+        model = Report
+        fields = DisbursementReportSerializer.Meta.fields + ["disbursement"]
 
 
 class ReceiptTypeSerializer(serializers.ModelSerializer):

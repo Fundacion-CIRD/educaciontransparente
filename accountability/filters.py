@@ -25,6 +25,7 @@ class DisbursementFilter(filters.FilterSet):
     funds_origin = filters.ModelChoiceFilter(
         queryset=DisbursementOrigin.objects.all(), label="Origen del fondo"
     )
+    year = filters.NumberFilter(field_name="resolution__document_year", label="Año")
     disbursement_date = filters.DateFromToRangeFilter(field_name="disbursement_date")
 
 

@@ -174,7 +174,7 @@ class Report(models.Model):
     disbursement = models.OneToOneField(
         Disbursement,
         on_delete=models.CASCADE,
-        related_name="reports",
+        related_name="report",
         verbose_name="desembolso",
     )
     status = models.CharField(

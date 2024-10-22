@@ -65,39 +65,42 @@
             </tr>
             </thead>
             <tbody>
-            <template x-for="report in results" :key="report.id">
-              <tr :class="tagColor(report)">
-                <td class="has-text-centered" x-text="report.disbursement.resolution.documentYear"></td>
-                <td x-text="report.disbursement.principalName"></td>
-                <td class="has-text-right" x-text="formatNumber(report.disbursement.principalIssuedId)"></td>
+            <template x-for="disbursement in results" :key="disbursement.id">
+              <tr :class="tagColor(disbursement)">
+                <td class="has-text-centered" x-text="disbursement.resolution.documentYear"></td>
+                <td x-text="disbursement.principalName"></td>
+                <td class="has-text-right" x-text="formatNumber(disbursement.principalIssuedId)"></td>
                 <td class="has-text-centered">
-                  <template x-if="report.disbursement.resolution.document">
-                    <a :href="report.disbursement.resolution.document">
+                  <template x-if="disbursement.resolution.document">
+                    <a :href="disbursement.resolution.document">
                   <span
-                    x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></span>
+                    x-text="`${disbursement.resolution.documentNumber}/${disbursement.resolution.documentYear}`"></span>
                       <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                   </template>
-                  <template x-if="!report.disbursement.resolution.document">
+                  <template x-if="!disbursement.resolution.document">
                   <span
-                    x-text="`${report.disbursement.resolution.documentNumber}/${report.disbursement.resolution.documentYear}`"></span>
+                    x-text="`${disbursement.resolution.documentNumber}/${disbursement.resolution.documentYear}`"></span>
                   </template>
                 </td>
                 <td class="has-text-right"
-                    x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.resolutionAmount)"></td>
-                <td class="has-text-centered" x-text="formatDate(report.disbursement.disbursementDate)"></td>
+                    x-text="new Intl.NumberFormat('es-PY').format(disbursement.resolutionAmount)"></td>
+                <td class="has-text-centered" x-text="formatDate(disbursement.disbursementDate)"></td>
                 <td class="has-text-right"
-                    x-text="new Intl.NumberFormat('es-PY').format(report.disbursement.amountDisbursed)"></td>
+                    x-text="new Intl.NumberFormat('es-PY').format(disbursement.amountDisbursed)"></td>
                 <td class="has-text-centered">
-                  <span x-text="formatDate(report.disbursement.dueDate)"></span>
+                  <span x-text="formatDate(disbursement.dueDate)"></span>
                 </td>
                 <td class="has-text-centered">
-                  <span x-text="formatDate(report.reportDate)"></span>
+                  <span x-text="disbursement.report && formatDate(disbursement.report.reportDate)"></span>
                 </td>
                 <td class="has-text-right"
-                    x-text="new Intl.NumberFormat('es-PY').format(report.reportedAmount || 0)"></td>
+                    x-text="disbursement.report && new Intl.NumberFormat('es-PY').format(disbursement.report.reportedAmount || 0)"></td>
                 <td class="has-text-centered">
-                  <a :href="`/instituciones/${report.disbursement.institutionId}/rendiciones/${report.id}/`">Ver</a>
+                  <template x-if="disbursement.report">
+                    <a
+                      :href="`/instituciones/${disbursement.institutionId}/rendiciones/${disbursement.report.id}/`">Ver</a>
+                  </template>
                 </td>
               </tr>
             </template>

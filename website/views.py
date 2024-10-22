@@ -184,7 +184,7 @@ class ReportDetailView(TemplateView):
         context["report"] = get_object_or_404(Report, pk=kwargs.get("report_id"))
         context["receipts"] = context["report"].receipts.order_by("-receipt_date")
         reported_qs = Report.objects.filter(id=context["report"].id)
-        disbursement_qs = Disbursement.objects.filter(reports__in=reported_qs)
+        disbursement_qs = Disbursement.objects.filter(report__in=reported_qs)
         context["totals"] = get_totals(disbursement_qs, reported_qs)
         return context
 
@@ -354,7 +354,7 @@ def add_csv_data(csv_writer, collection, request):
     )
     columns = collection_settings["headers"]
     csv_writer.writerow(columns)
-    for item in filterset.qs.all():
+    for item in filterset.qs.distinct():
         csv_writer.writerow(collection_settings["extractor"](item))
 
 
