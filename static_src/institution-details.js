@@ -287,7 +287,6 @@ function institutionDetails() {
       }
 
       const {balance, reportDate} = disbursement.report;
-      console.log(disbursement);
       if (balance < 0 && reportDate <= dueDate) {
         return '';
       }
