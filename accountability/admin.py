@@ -179,6 +179,7 @@ class ProviderAdmin(ModelAdmin):
 
 @register(Receipt)
 class ReceiptAdmin(ModelAdmin):
+    ordering = ("-receipt_date",)
     list_display = (
         "receipt_type",
         "receipt_date",
