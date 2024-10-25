@@ -26,7 +26,7 @@
           <label class="label" for="yearSelect">Año de resolución</label>
           <div class="control">
             <div class="select">
-              <select x-on:change="setYear" id="yearSelect">
+              <select x-model="year" x-on:change="setYear" id="yearSelect">
                 <option value="" selected>Todos</option>
                 {% localize off %}
                   {% for year in years %}

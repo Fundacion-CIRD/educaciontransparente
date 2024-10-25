@@ -214,9 +214,14 @@ function institutionDetails() {
       this.barChart = barChart;
       this.years = years;
       await initTreemapChart(this.institutionId, this.year);
-      const data = await fetchResults(this.institutionId, this.year);
-      this.results = data.results;
-      this.summary = data.summary;
+      const params = new URLSearchParams(window.location.search);
+      const yearParam = params.get('year');
+      if (yearParam) void this.setYear(null, yearParam);
+      else {
+        const data = await fetchResults(this.institutionId, this.year);
+        this.results = data.results;
+        this.summary = data.summary;
+      }
     },
     highlightChart() {
       const dataIndex = this.years.indexOf(this.year);
@@ -235,14 +240,18 @@ function institutionDetails() {
         });
       }
     },
-    async setYear(event) {
-      this.year = event.target.value || null;
+    async setYear(event, year = null) {
+      if (event) this.year = event.target.value || null;
+      else this.year = year;
       const data = await fetchResults(this.institutionId, this.year);
       this.results = data.results;
       this.summary = data.summary;
       const treemapOption = await generateTreemapOption(this.institutionId, this.year);
       treemapChart.setOption(treemapOption);
       this.highlightChart();
+      const url = new URL(window.location);
+      url.searchParams.set('year', this.year);
+      window.history.pushState({}, '', url);
     },
     formatDate(dateStr) {
       if (!dateStr) {
